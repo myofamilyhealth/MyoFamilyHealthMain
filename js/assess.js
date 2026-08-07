@@ -43,26 +43,20 @@
     },
     {
       key: "mouth",
-      name: "Mouth, Tongue & Jaw",
-      intro: "Where the tongue rests shapes the teeth, the bite and the jaw over time — and restricted tongue movement makes everything harder.",
+      name: "Tongue & Mouth",
+      intro: "Where the tongue rests shapes the teeth and the bite over time — and restricted tongue movement makes everything harder.",
       questions: [
         "Has a provider ever mentioned that {S} may have a tongue tie or restricted tongue movement?",
-        "With the mouth open wide, is it hard for {S} to lift the tongue up to the roof of the mouth?",
-        "{DO} have jaw pain, clicking or popping, or headaches around the temples?",
-        "{HAVE} had orthodontic work, and the teeth have shifted back or the bite no longer closes properly?",
-        "Does the tongue push against or between the front teeth when swallowing or at rest?",
-        "{DO} have neck or shoulder tension, or a head-forward posture?"
+        "With the mouth open wide, is it hard for {S} to lift the tongue up to the roof of the mouth?"
       ]
     },
     {
       key: "habits",
-      name: "Eating, Speech & Habits",
-      intro: "Chewing, swallowing and speaking all use the same muscles. Long-standing oral habits keep those muscles working in the wrong pattern.",
+      name: "Eating & Habits",
+      intro: "Chewing and swallowing use the same muscles as breathing. Long-standing oral habits keep those muscles working in the wrong pattern.",
       questions: [
-        "{DO} eat quickly, take large bites, or chew with the mouth open?",
-        "{ARE} a picky eater, or gag easily on certain food textures?",
+        "{ARE} a messy or picky eater — eating quickly, taking big bites, or gagging on certain food textures?",
         "{DO} make noise while eating or drinking, or lose food or liquid from the mouth?",
-        "Are there speech sounds that stay unclear — such as s, z, th, l or r?",
         "{DO} suck a thumb, finger, pacifier, nails, lips or cheeks?",
         "As a baby, was feeding difficult for {S} — a poor latch, very long feeds, reflux or heavy colic?"
       ]
@@ -75,9 +69,13 @@
     { label: "No", value: 0 }
   ];
 
-  var PER_SECTION = 6;
-  var MAX_PER_SECTION = PER_SECTION * 2;
-  var MAX_TOTAL = SECTIONS.length * MAX_PER_SECTION;
+  /* Sections no longer hold the same number of questions, so every count is
+     derived from the data rather than assumed. */
+  function countOf(si) { return SECTIONS[si].questions.length; }
+  function maxOf(si) { return countOf(si) * 2; }
+
+  var TOTAL_QUESTIONS = SECTIONS.reduce(function (n, s) { return n + s.questions.length; }, 0);
+  var MAX_TOTAL = TOTAL_QUESTIONS * 2;
 
   /* Red flags reference questions by "sectionIndex.questionIndex". */
   var FLAGS = [
@@ -100,10 +98,6 @@
     {
       at: "2.1", min: 2,
       text: "The tongue cannot reach the roof of the mouth with the mouth open wide. That restriction affects swallowing, speech and how the jaw grows."
-    },
-    {
-      at: "2.2", min: 2,
-      text: "Ongoing jaw pain, clicking or temple headaches. Worth mentioning to your dentist alongside a myofunctional assessment."
     }
   ];
 
@@ -120,14 +114,14 @@
       "Several signs of sleep-disordered breathing. Please bring these to a physician or sleep specialist as well as a myofunctional therapist."
     ],
     mouth: [
-      "Tongue, jaw and bite look to be working comfortably together.",
-      "Some signs of tongue posture, bite or jaw strain. These often respond well to exercise-based therapy.",
-      "Clear signs of restricted tongue function, tongue thrust or jaw strain — the core of what myofunctional therapy retrains."
+      "Tongue movement looks free and unrestricted.",
+      "Some signs that tongue movement may be restricted. Worth having looked at properly.",
+      "Clear signs of restricted tongue movement — the core of what myofunctional therapy retrains."
     ],
     habits: [
-      "Eating, speech and oral habits look settled.",
+      "Eating and oral habits look settled.",
       "A few habit and feeding signs. Small, consistent changes often clear these up.",
-      "Several long-standing oral habits or feeding and speech difficulties, which tend to keep the wrong muscle pattern in place."
+      "Several long-standing oral habits or feeding difficulties, which tend to keep the wrong muscle pattern in place."
     ]
   };
 
@@ -141,7 +135,7 @@
         return "Good news — very few of the signs we screen for came up for " + t.S + ". Keep an eye on nasal breathing and lip seal, since those are the habits that quietly drift. If something specific still worries you, a free consultation costs nothing but the conversation.";
       },
       nextTitle: "Keep it that way",
-      nextCopy: "Nothing here suggests an urgent problem. The free guides and games below are a nice way to reinforce good habits at home — and the newsletter will keep you posted as new material lands."
+      nextCopy: "Nothing here suggests an urgent problem. If anything changes, or you would simply like a second opinion, a free consultation costs nothing but the conversation."
     },
     mod: {
       cls: "mod",
@@ -228,7 +222,7 @@
                   (isLast ? "See My Result" : "Continue") +
                   ' <svg aria-hidden="true"><use href="#ic-arrow"/></svg></button>' +
               "</div>" +
-              '<p class="qz-hint" data-hint>Answer all ' + PER_SECTION + " questions to continue.</p>";
+              '<p class="qz-hint" data-hint>Answer all ' + sec.questions.length + " questions to continue.</p>";
 
       panel.innerHTML = html;
       elSections.appendChild(panel);
@@ -256,7 +250,7 @@
 
   function sectionAnsweredCount(si) {
     var c = 0;
-    for (var qi = 0; qi < PER_SECTION; qi++) {
+    for (var qi = 0; qi < countOf(si); qi++) {
       if (answers[si + "." + qi] !== undefined) c++;
     }
     return c;
@@ -266,7 +260,7 @@
     var panel = elSections.children[si];
     if (!panel) return;
     var done = sectionAnsweredCount(si);
-    var complete = done === PER_SECTION;
+    var complete = done === countOf(si);
 
     panel.querySelector('[data-act="next"]').disabled = !complete;
 
@@ -275,7 +269,7 @@
       hint.textContent = "All set — continue when you're ready.";
       hint.classList.remove("warn");
     } else {
-      hint.textContent = done + " of " + PER_SECTION + " answered.";
+      hint.textContent = done + " of " + countOf(si) + " answered.";
       hint.classList.remove("warn");
     }
     updateProgress();
@@ -319,7 +313,7 @@
   function updateProgress() {
     if (!elBarFill) return;
     var answered = Object.keys(answers).length;
-    var pct = current < 0 ? 0 : Math.round((answered / (SECTIONS.length * PER_SECTION)) * 100);
+    var pct = current < 0 ? 0 : Math.round((answered / TOTAL_QUESTIONS) * 100);
     elBarFill.style.width = pct + "%";
     elBar.setAttribute("aria-valuenow", String(pct));
   }
@@ -336,13 +330,14 @@
     var total = 0;
     var cats = SECTIONS.map(function (sec, si) {
       var sum = 0;
-      for (var qi = 0; qi < PER_SECTION; qi++) sum += answers[si + "." + qi] || 0;
+      for (var qi = 0; qi < countOf(si); qi++) sum += answers[si + "." + qi] || 0;
       total += sum;
       return {
         key: sec.key,
         name: sec.name,
         sum: sum,
-        pct: Math.round((sum / MAX_PER_SECTION) * 100)
+        max: maxOf(si),
+        pct: Math.round((sum / maxOf(si)) * 100)
       };
     });
 
@@ -399,7 +394,7 @@
       var div = document.createElement("div");
       div.className = "qz-cat";
       div.innerHTML =
-        '<div class="qz-cat-top"><strong>' + c.name + "</strong><span>" + c.sum + " of " + MAX_PER_SECTION + "</span></div>" +
+        '<div class="qz-cat-top"><strong>' + c.name + "</strong><span>" + c.sum + " of " + c.max + "</span></div>" +
         '<div class="qz-cat-bar"><i class="' + (b === 2 ? "hot" : b === 1 ? "mid" : "") + '"></i></div>' +
         '<p class="qz-cat-note">' + CAT_NOTES[c.key][b] + "</p>";
       catsEl.appendChild(div);

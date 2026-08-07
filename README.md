@@ -11,7 +11,7 @@ contact and locations — plus a dedicated self-assessment tool.
 | File | Contents |
 |---|---|
 | `index.html` | The hub. Hero, nine tappable link tiles (the Linktree layer), self-assessment feature, both games, "what is myofunctional therapy", newsletter signup, the free research library, booking band, contact & locations, footer with legal links. |
-| `assess.html` | The free myofunctional self-assessment — 24 questions across 4 sections, scored, with a personalised result and next steps. |
+| `assess.html` | The free myofunctional self-assessment — 18 questions across 4 sections, scored, with a personalised result and next steps. |
 
 ## What links where
 
@@ -54,23 +54,22 @@ gate that locks people out of a healthcare site on a network error is worse than
 
 ## The self-assessment
 
-Twenty-four questions in four sections — **Breathing & Airway**, **Sleep & Rest**,
-**Mouth, Tongue & Jaw**, and **Eating, Speech & Habits**. Each is answered
-Yes (2) / Sometimes (1) / No (0), for a maximum of 48.
+Eighteen questions in four sections — **Breathing & Airway** (6), **Sleep & Rest** (6),
+**Tongue & Mouth** (2), and **Eating & Habits** (4). Each is answered
+Yes (2) / Sometimes (1) / No (0), for a maximum of 36.
 
 - The visitor first picks whether they're answering for **themselves** or for **their
   child**; every question is re-worded to match.
 - Result bands: **under 20 %** few signs · **20–44 %** some signs · **45 %+** many signs.
 - A per-section breakdown explains which area is showing the most signs.
-- Six specific answers raise a **"worth raising with a provider soon"** flag — witnessed
-  apneas or gasping, habitual snoring, daytime sleepiness, a known tongue tie, a tongue
-  that can't reach the palate, and ongoing jaw pain.
+- Five specific answers raise a **"worth raising with a provider soon"** flag — witnessed
+  apneas or gasping, habitual snoring, daytime sleepiness, a known tongue tie, and a
+  tongue that can't reach the palate.
 - Answers never leave the browser. Nothing is submitted, stored or transmitted, and no
   email is required to see a result. "Save or print my result" uses the browser's own
   print dialog, and a print stylesheet strips the navigation and buttons.
 
-The result page ends on four next steps: book a free consultation, join the newsletter,
-play Sleep Lab, or read the research.
+The result page ends on a single next step: book a free consultation.
 
 A medical disclaimer sits under the assessment and in the site footer: this is an
 educational screening tool, not a diagnosis, and not a substitute for evaluation by a
