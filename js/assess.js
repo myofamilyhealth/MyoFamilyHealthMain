@@ -141,7 +141,7 @@
         return "Good news — very few of the signs we screen for came up for " + t.S + ". Keep an eye on nasal breathing and lip seal, since those are the habits that quietly drift. If something specific still worries you, a free consultation costs nothing but the conversation.";
       },
       nextTitle: "Keep it that way",
-      nextCopy: "Nothing here suggests an urgent problem. The free resources and games below are a nice way to reinforce good habits at home — and the newsletter will keep you posted as new material lands."
+      nextCopy: "Nothing here suggests an urgent problem. The free guides and games below are a nice way to reinforce good habits at home — and the newsletter will keep you posted as new material lands."
     },
     mod: {
       cls: "mod",
