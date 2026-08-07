@@ -129,9 +129,9 @@
 
         '<button class="gate-bypass" type="button" id="gateSkip">I already submitted my email</button>',
 
-        '<p class="gate-fine">By entering your email you\'ll also join the free Myo Family Health newsletter — new courses, games and fresh information on breathing and sleep. No spam, and you can unsubscribe from any email. See our <a href="https://www.myofamilyhealth.com/privacy-policy/" target="_blank" rel="noopener">Privacy Policy</a>.</p>',
+        '<p class="gate-fine">By entering your email you\'ll also join the free Myo Family Health newsletter — new courses, games and fresh information on breathing and sleep. We use your address for that and nothing else, we never sell or share it, and you can unsubscribe from any email.</p>',
 
-        '<p class="gate-contact">Would rather just talk to us? Call <a href="tel:+17076311550">707.631.1550</a> or visit <a href="https://www.myofamilyhealth.com/" target="_blank" rel="noopener">myofamilyhealth.com</a>.</p>',
+        '<p class="gate-contact">Would rather just talk to us? Call <a href="tel:+17076311550">707.631.1550</a> — we\'re happy to answer questions without any of this.</p>',
       '</div>'
     ].join("");
 

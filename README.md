@@ -19,11 +19,10 @@ contact and locations — plus a dedicated self-assessment tool.
 |---|---|
 | Book a free consultation | `https://amy-rondoni.clientsecure.me` |
 | Phone | `707.631.1550` |
-| Main website | `https://www.myofamilyhealth.com/` |
 | Sleep Lab game | `https://myofamilyhealth.github.io/Sleep-Lab-Game/` |
 | MyoLand game (ages 4–8) | `https://myofamilyhealth.github.io/myo-family-health-game/` |
 | Newsletter form | Brevo (`sibforms.com`) embed — the same form as the newsletter landing page |
-| Research library | Individual `myofamilyhealth.com/resource/...` pages, grouped by topic |
+| Free guides | `https://myofamilyhealth.github.io/instagramfree/` — four myo therapy guides |
 | Social | Instagram, Facebook, YouTube — all `@myofamilyhealth` |
 
 Outbound links to the games carry `utm_source` / `utm_medium` / `utm_content` so hub
