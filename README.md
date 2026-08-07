@@ -29,6 +29,30 @@ contact and locations — plus a dedicated self-assessment tool.
 Outbound links to the games carry `utm_source` / `utm_medium` / `utm_content` so hub
 traffic can be told apart from Instagram traffic in analytics.
 
+## The email access gate
+
+Visitors give an email address before the site unlocks. The address goes straight to the
+same Brevo list the newsletter form feeds, so an unlock and a newsletter subscription are
+the same event.
+
+- Configured at the top of `js/gate.js`. `scope: "site"` gates everything; `scope: "assess"`
+  leaves the hub open and gates only the assessment; `enabled: false` turns it off.
+- An unlocked visitor is remembered for a year (`localStorage`), so they are asked once.
+- **"I already submitted my email"** lets returning subscribers — a second device, or
+  someone who joined through the newsletter form — straight through without asking again.
+- The email is validated client-side before anything is sent. Brevo answers
+  `{"success":true}` to *any* input including malformed addresses, so that check is the
+  only thing keeping typos off the list.
+- A honeypot field (`email_address_check`) matches Brevo's own bot protection.
+
+**It fails open, deliberately.** If storage is blocked, if `gate.js` 404s, if Brevo is
+unreachable, or if the script never executes at all, the visitor gets in. A lead-capture
+gate that locks people out of a healthcare site on a network error is worse than no gate.
+
+> **This is lead capture, not access control.** The site is public and static — the HTML,
+> CSS and JS are readable by anyone who views source, and the gate is bypassed by turning
+> JavaScript off or by clicking the bypass link. Never put anything confidential behind it.
+
 ## The self-assessment
 
 Twenty-four questions in four sections — **Breathing & Airway**, **Sleep & Rest**,
@@ -69,10 +93,14 @@ a slide-in drawer for navigation below 1080 px, no horizontal overflow at 390 px
 index.html      hub page
 assess.html     self-assessment
 css/site.css    design tokens + every component, shared by both pages
+js/gate.js      email access gate (config block at the top of the file)
 js/site.js      nav shadow, mobile drawer, reveal-on-scroll
 js/assess.js    assessment questions, scoring, result rendering
 assets/         brand marks (logo, tree, square social image)
 ```
+
+Both HTML files carry a small inline script in `<head>` that flags the document before
+first paint, so page content is never flashed behind the gate.
 
 No build step, no dependencies, no framework. Plain HTML, CSS and JavaScript.
 

@@ -848,6 +848,176 @@ button { font-family: inherit; cursor: pointer; }
 }
 
 /* ============================================================
+   EMAIL ACCESS GATE
+   The head script adds .gated to <html> before the body paints,
+   so real content is never flashed before the overlay appears.
+   If JS is off or js/gate.js fails to load, .gated is never set
+   (or is removed) and the site stays open — fail open, never
+   leave a visitor staring at a wall they cannot get past.
+   ============================================================ */
+html.gated { overflow: hidden; }
+html.gated body { overflow: hidden; background: var(--offwhite); }
+html.gated body > *:not(.gate) { display: none !important; }
+
+/* The overlay is bound to the same flag that hides the content, so the two can
+   never disagree — no state where the gate shows over a visible page, and none
+   where the page stays hidden after the gate has gone. .closing keeps it painted
+   for the fade-out, after which JS removes the element. */
+.gate { display: none; }
+html.gated .gate, .gate.closing { display: grid; }
+
+.gate {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  place-items: center;
+  padding: clamp(16px, 4vw, 40px);
+  overflow-y: auto;
+  background:
+    radial-gradient(900px 480px at 85% -10%, var(--mint) 0%, transparent 68%),
+    radial-gradient(700px 420px at -10% 30%, var(--sand) 0%, transparent 62%),
+    var(--offwhite);
+}
+
+.gate-card {
+  width: 100%;
+  max-width: 520px;
+  background: var(--white);
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  box-shadow: var(--sh-lg);
+  padding: clamp(28px, 5vw, 48px) clamp(22px, 4.5vw, 44px);
+  text-align: center;
+  animation: gateIn .5s cubic-bezier(.2,.7,.3,1);
+}
+@keyframes gateIn { from { opacity: 0; transform: translateY(18px) scale(.985); } to { opacity: 1; transform: none; } }
+
+.gate-mark { width: clamp(58px, 11vw, 74px); margin: 0 auto 18px; }
+.gate-mark img { width: 100%; height: auto; }
+
+.gate-card h1 {
+  font-size: clamp(25px, 4.2vw, 34px);
+  margin-top: 12px;
+}
+.gate-card .gate-sub {
+  margin: 14px auto 0;
+  max-width: 400px;
+  font-size: 16px;
+  color: var(--slate-soft);
+}
+
+.gate-perks {
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+  margin: 26px 0 28px;
+  padding: 20px 22px;
+  background: var(--mint);
+  border-radius: var(--r-md);
+  text-align: left;
+}
+.gate-perks div {
+  display: flex;
+  align-items: flex-start;
+  gap: 11px;
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--teal-ink);
+}
+.gate-perks svg {
+  width: 19px; height: 19px;
+  flex: none;
+  margin-top: 2px;
+  color: var(--teal-deep);
+}
+
+.gate-form { display: flex; flex-direction: column; gap: 11px; }
+.gate-field {
+  width: 100%;
+  padding: 16px 20px;
+  font-family: inherit;
+  font-size: 16px; /* 16px keeps iOS from zooming the viewport on focus */
+  color: var(--slate);
+  background: var(--offwhite);
+  border: 1.5px solid var(--line);
+  border-radius: var(--r-pill);
+  text-align: center;
+  transition: border-color .2s ease, background .2s ease, box-shadow .2s ease;
+}
+.gate-field::placeholder { color: var(--slate-faint); }
+.gate-field:focus {
+  outline: none;
+  background: var(--white);
+  border-color: var(--teal-deep);
+  box-shadow: 0 0 0 4px rgba(120,180,180,0.18);
+}
+.gate-field.invalid { border-color: #C4705A; background: #FDF3F0; }
+
+.gate-form .btn { width: 100%; }
+.gate-form .btn.loading { pointer-events: none; opacity: .75; }
+.gate-form .btn.loading svg { animation: gateSpin .8s linear infinite; }
+@keyframes gateSpin { to { transform: rotate(360deg); } }
+
+/* Honeypot — Brevo rejects the submission if a bot fills this in. */
+.gate-hp {
+  position: absolute;
+  left: -9999px;
+  width: 1px; height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.gate-msg {
+  min-height: 20px;
+  margin-top: 4px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #A9502F;
+}
+.gate-msg:empty { min-height: 0; }
+
+.gate-bypass {
+  display: block;
+  margin: 18px auto 0;
+  padding: 6px 4px;
+  background: none;
+  border: 0;
+  font-family: inherit;
+  font-size: 14.5px;
+  font-weight: 500;              /* findable, but not competing with the CTA */
+  color: var(--slate-soft);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  transition: color .2s ease;
+}
+.gate-bypass:hover { color: var(--teal-deep); }
+
+.gate-fine {
+  margin-top: 20px;
+  font-size: 12.6px;
+  line-height: 1.7;
+  color: var(--slate-faint);
+}
+.gate-fine a { color: var(--slate-soft); text-decoration: underline; text-underline-offset: 2px; }
+.gate-fine a:hover { color: var(--teal-deep); }
+
+.gate-contact {
+  margin-top: 18px;
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
+  font-size: 13.5px;
+  color: var(--slate-soft);
+}
+.gate-contact a { color: var(--teal-deep); font-weight: 600; }
+
+.gate.closing { opacity: 0; transition: opacity .45s ease; pointer-events: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  .gate-card { animation: none; }
+  .gate.closing { transition: none; }
+}
+
+/* ============================================================
    SELF-ASSESSMENT (assess.html)
    ============================================================ */
 

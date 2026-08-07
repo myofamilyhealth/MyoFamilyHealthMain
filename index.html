@@ -8,6 +8,26 @@
 <meta name="theme-color" content="#457F7C" />
 <link rel="canonical" href="https://myofamilyhealth.github.io/MyoFamilyHealthMain/" />
 
+<!-- Access gate. Flags the document before the body paints so page content is
+     never flashed behind the overlay. Fails open on every error path: storage
+     unavailable, script missing, or gate.js never reaching the DOM. -->
+<script>
+(function () {
+  try {
+    var r = localStorage.getItem("mfh_access_v1");
+    if (r && JSON.parse(r).ok) return;      // returning visitor — already unlocked
+  } catch (e) { return; }                   // storage blocked — let them straight in
+  document.documentElement.className += " gated";
+  // Last-resort failsafe: if gate.js never executes at all, open the site.
+  // gate.js clears this the moment it runs, so a slow network (render-blocking
+  // fonts delaying the deferred script) can never drop the gate on its own.
+  window.__mfhGateFailsafe = setTimeout(function () {
+    document.documentElement.classList.remove("gated");
+  }, 8000);
+})();
+</script>
+<script defer src="js/gate.js" onerror="document.documentElement.classList.remove('gated')"></script>
+
 <meta property="og:type" content="website" />
 <meta property="og:title" content="Myo Family Health — Everything in One Place" />
 <meta property="og:description" content="Free self-assessment, the Sleep Lab game, our free newsletter, research resources, and booking — all in one place. Breathe Better…Live Better!" />
