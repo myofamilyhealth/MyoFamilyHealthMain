@@ -24,7 +24,7 @@
         "{ARE} often sitting or resting with {P} lips apart?",
         "{DO} often have a stuffy, blocked or runny nose?",
         "{DO} wake up with a dry mouth, chapped lips, or feeling thirsty?",
-        "{DO} switch to mouth breathing during exercise or after talking a lot?",
+        "{DO} switch to mouth breathing during exercise or physical effort?",
         "{HAVE} had ongoing allergies, sinus problems, or enlarged tonsils or adenoids?"
       ]
     },
@@ -97,7 +97,7 @@
     },
     {
       at: "2.1", min: 2,
-      text: "The tongue cannot reach the roof of the mouth with the mouth open wide. That restriction affects swallowing, speech and how the jaw grows."
+      text: "The tongue cannot reach the roof of the mouth with the mouth open wide. That restriction affects swallowing, nasal breathing and how the jaw grows."
     }
   ];
 
