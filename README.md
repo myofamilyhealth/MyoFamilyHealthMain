@@ -22,7 +22,8 @@ contact and locations — plus a dedicated self-assessment tool.
 | Sleep Lab game | `https://myofamilyhealth.github.io/Sleep-Lab-Game/` |
 | MyoLand game (ages 4–8) | `https://myofamilyhealth.github.io/myo-family-health-game/` |
 | Newsletter form | Brevo (`sibforms.com`) embed — the same form as the newsletter landing page |
-| Free guides | `https://myofamilyhealth.github.io/instagramfree/` — four myo therapy guides |
+| Free guides (site) | `https://myofamilyhealth.github.io/instagramfree/` — the guides landing page |
+| Free guides (PDFs) | `…/instagramfree/pdfs/{breathing,tongue-posture,growing-smiles,sleep-airway}.pdf` |
 | Social | Instagram, Facebook, YouTube — all `@myofamilyhealth` |
 
 Outbound links to the games carry `utm_source` / `utm_medium` / `utm_content` so hub
