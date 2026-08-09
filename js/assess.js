@@ -183,6 +183,11 @@
 
   function tok() { return TOKENS[subject]; }
 
+  /* Analytics is optional; a missing hook must never break the assessment. */
+  function track(name) {
+    try { if (window.mfhTrack) window.mfhTrack(name); } catch (e) { /* ignore */ }
+  }
+
   function phrase(str) {
     var t = tok();
     return str.replace(/\{(DO|HAVE|ARE|P|S)\}/g, function (_, k) { return t[k]; });
@@ -361,6 +366,11 @@
     var v = VERDICTS[r.tier];
     var t = tok();
 
+    /* Outcome band only — never an answer, never a score breakdown. */
+    if (!window.mfhTrackConfig || window.mfhTrackConfig.trackResultBand !== false) {
+      track("assess-complete-" + r.tier);
+    }
+
     current = SECTIONS.length;
     elIntro.classList.remove("active");
     Array.prototype.forEach.call(elSections.children, function (p) { p.classList.remove("active"); });
@@ -442,13 +452,17 @@
   elIntro.querySelectorAll("[data-subject]").forEach(function (btn) {
     btn.addEventListener("click", function () {
       subject = btn.dataset.subject;
+      track("assess-start-" + subject);
       answers = {};
       buildSections();
       goTo(0);
     });
   });
 
-  document.getElementById("qzPrint").addEventListener("click", function () { window.print(); });
+  document.getElementById("qzPrint").addEventListener("click", function () {
+    track("assess-print");
+    window.print();
+  });
 
   document.getElementById("qzRestart").addEventListener("click", function () {
     answers = {};

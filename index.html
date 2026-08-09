@@ -26,6 +26,7 @@
   }, 8000);
 })();
 </script>
+<script defer src="js/analytics.js?v=1"></script>
 <script defer src="js/gate.js" onerror="document.documentElement.classList.remove('gated')"></script>
 
 <meta property="og:type" content="website" />
@@ -152,38 +153,38 @@
   <div class="wrap">
     <div class="hub-grid">
 
-      <a class="hub-tile feature reveal" href="assess.html">
+      <a data-track="assessment-open" class="hub-tile feature reveal" href="assess.html">
         <span class="tile-flag">New</span>
         <span class="ic"><svg aria-hidden="true"><use href="#ic-clipboard"/></svg></span>
         <span class="tt"><strong>Free Self-Assessment</strong><span>2 minutes — find out if myofunctional therapy could help you or your child.</span></span>
         <span class="go"><svg aria-hidden="true"><use href="#ic-arrow"/></svg></span>
       </a>
 
-      <a class="hub-tile reveal" data-delay="1" href="https://myofamilyhealth.github.io/Sleep-Lab-Game/?utm_source=hub&amp;utm_medium=referral&amp;utm_content=tile" target="_blank" rel="noopener">
+      <a data-track="game-sleep-lab" class="hub-tile reveal" data-delay="1" href="https://myofamilyhealth.github.io/Sleep-Lab-Game/?utm_source=hub&amp;utm_medium=referral&amp;utm_content=tile" target="_blank" rel="noopener">
         <span class="ic"><svg aria-hidden="true"><use href="#ic-moon"/></svg></span>
         <span class="tt"><strong>Play Sleep Lab</strong><span>Build the perfect night's sleep in our free 3D bedroom game.</span></span>
         <span class="go"><svg aria-hidden="true"><use href="#ic-external"/></svg></span>
       </a>
 
-      <a class="hub-tile reveal" data-delay="2" href="https://amy-rondoni.clientsecure.me" target="_blank" rel="noopener">
+      <a data-track="booking" class="hub-tile reveal" data-delay="2" href="https://amy-rondoni.clientsecure.me" target="_blank" rel="noopener">
         <span class="ic"><svg aria-hidden="true"><use href="#ic-calendar"/></svg></span>
         <span class="tt"><strong>Book a Free Consultation</strong><span>Talk with Amy — no cost, no pressure. In person or online.</span></span>
         <span class="go"><svg aria-hidden="true"><use href="#ic-external"/></svg></span>
       </a>
 
-      <a class="hub-tile reveal" data-delay="3" href="https://myofamilyhealth.github.io/myo-family-health-game/?utm_source=hub&amp;utm_medium=referral&amp;utm_content=tile" target="_blank" rel="noopener">
+      <a data-track="game-myoland" class="hub-tile reveal" data-delay="3" href="https://myofamilyhealth.github.io/myo-family-health-game/?utm_source=hub&amp;utm_medium=referral&amp;utm_content=tile" target="_blank" rel="noopener">
         <span class="ic"><svg aria-hidden="true"><use href="#ic-smile"/></svg></span>
         <span class="tt"><strong>Play MyoLand (ages 4–8)</strong><span>A board-game adventure that sneaks in real nasal-breathing exercises.</span></span>
         <span class="go"><svg aria-hidden="true"><use href="#ic-external"/></svg></span>
       </a>
 
-      <a class="hub-tile reveal" data-delay="4" href="https://myofamilyhealth.github.io/instagramfree/?utm_source=hub&amp;utm_medium=referral&amp;utm_content=tile" target="_blank" rel="noopener">
+      <a data-track="guides-site" class="hub-tile reveal" data-delay="4" href="https://myofamilyhealth.github.io/instagramfree/?utm_source=hub&amp;utm_medium=referral&amp;utm_content=tile" target="_blank" rel="noopener">
         <span class="ic"><svg aria-hidden="true"><use href="#ic-book"/></svg></span>
         <span class="tt"><strong>Free Resource Library</strong><span>Four free myo therapy guides — breathing, tongue posture, kids and sleep.</span></span>
         <span class="go"><svg aria-hidden="true"><use href="#ic-external"/></svg></span>
       </a>
 
-      <a class="hub-tile reveal" data-delay="5" href="tel:+17076311550">
+      <a data-track="call" class="hub-tile reveal" data-delay="5" href="tel:+17076311550">
         <span class="ic"><svg aria-hidden="true"><use href="#ic-phone"/></svg></span>
         <span class="tt"><strong>Call 707.631.1550</strong><span>Questions? Give the office a ring — appointments by request.</span></span>
         <span class="go"><svg aria-hidden="true"><use href="#ic-arrow"/></svg></span>
@@ -227,7 +228,7 @@
     </div>
 
     <div style="text-align:center;margin-top:clamp(34px,4.4vw,52px)" class="reveal">
-      <a class="btn btn-primary btn-lg" href="assess.html">Start the Free Assessment <svg aria-hidden="true"><use href="#ic-arrow"/></svg></a>
+      <a data-track="assessment-open" class="btn btn-primary btn-lg" href="assess.html">Start the Free Assessment <svg aria-hidden="true"><use href="#ic-arrow"/></svg></a>
     </div>
   </div>
 </section>
@@ -269,7 +270,7 @@
     </div>
 
     <div style="text-align:center;margin-top:clamp(34px,4.4vw,52px)" class="reveal">
-      <a class="btn btn-primary btn-lg" href="https://myofamilyhealth.github.io/instagramfree/?utm_source=hub&amp;utm_medium=referral&amp;utm_content=resources" target="_blank" rel="noopener">Open the Free Guides <svg aria-hidden="true"><use href="#ic-arrow"/></svg></a>
+      <a data-track="guides-site" class="btn btn-primary btn-lg" href="https://myofamilyhealth.github.io/instagramfree/?utm_source=hub&amp;utm_medium=referral&amp;utm_content=resources" target="_blank" rel="noopener">Open the Free Guides <svg aria-hidden="true"><use href="#ic-arrow"/></svg></a>
     </div>
 
     <div class="card-grid two" style="margin-top:clamp(28px,3.4vw,40px)">
@@ -314,7 +315,7 @@
           <h3>Sleep Lab</h3>
           <p>Set up a 3D bedroom — tongue position, lip seal, pillow, temperature, light — then run the night and read your morning sleep score.</p>
           <div class="game-tags"><span>Teens &amp; adults</span><span>3D</span><span>No tutorial — experiment</span></div>
-          <a class="btn btn-primary" href="https://myofamilyhealth.github.io/Sleep-Lab-Game/?utm_source=hub&amp;utm_medium=referral&amp;utm_content=game_card" target="_blank" rel="noopener">Play Sleep Lab <svg aria-hidden="true"><use href="#ic-play"/></svg></a>
+          <a data-track="game-sleep-lab" class="btn btn-primary" href="https://myofamilyhealth.github.io/Sleep-Lab-Game/?utm_source=hub&amp;utm_medium=referral&amp;utm_content=game_card" target="_blank" rel="noopener">Play Sleep Lab <svg aria-hidden="true"><use href="#ic-play"/></svg></a>
         </div>
       </article>
 
@@ -324,7 +325,7 @@
           <h3>MyoLand — The Great Nose &amp; Breathing Adventure</h3>
           <p>A board game for ages 4–8 where every silly mission is secretly a real nasal-breathing exercise. Coins, a prize wheel and hidden veggie friends.</p>
           <div class="game-tags"><span>Ages 4–8</span><span>Nasal breathing</span><span>Play at home</span></div>
-          <a class="btn btn-primary" href="https://myofamilyhealth.github.io/myo-family-health-game/?utm_source=hub&amp;utm_medium=referral&amp;utm_content=game_card" target="_blank" rel="noopener">Play MyoLand <svg aria-hidden="true"><use href="#ic-play"/></svg></a>
+          <a data-track="game-myoland" class="btn btn-primary" href="https://myofamilyhealth.github.io/myo-family-health-game/?utm_source=hub&amp;utm_medium=referral&amp;utm_content=game_card" target="_blank" rel="noopener">Play MyoLand <svg aria-hidden="true"><use href="#ic-play"/></svg></a>
         </div>
       </article>
     </div>
@@ -377,7 +378,7 @@
     </div>
 
     <div style="text-align:center;margin-top:clamp(34px,4.4vw,50px)" class="reveal">
-      <a class="btn btn-ghost btn-lg" href="assess.html">Check your own signs <svg aria-hidden="true"><use href="#ic-arrow"/></svg></a>
+      <a data-track="assessment-open" class="btn btn-ghost btn-lg" href="assess.html">Check your own signs <svg aria-hidden="true"><use href="#ic-arrow"/></svg></a>
     </div>
   </div>
 </section>
@@ -402,8 +403,8 @@
     <h2>Your first conversation is <span class="serif-accent">free</span></h2>
     <p>Talk through what you're noticing with Amy and find out whether myofunctional therapy is the right fit. In person or online.</p>
     <div class="band-ctas">
-      <a class="btn btn-white btn-lg" href="https://amy-rondoni.clientsecure.me" target="_blank" rel="noopener">Book a Free Consultation <svg aria-hidden="true"><use href="#ic-arrow"/></svg></a>
-      <a class="btn btn-ghost btn-lg" href="tel:+17076311550">Call 707.631.1550</a>
+      <a data-track="booking" class="btn btn-white btn-lg" href="https://amy-rondoni.clientsecure.me" target="_blank" rel="noopener">Book a Free Consultation <svg aria-hidden="true"><use href="#ic-arrow"/></svg></a>
+      <a data-track="call" class="btn btn-ghost btn-lg" href="tel:+17076311550">Call 707.631.1550</a>
     </div>
   </div>
 </section>

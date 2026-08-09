@@ -155,8 +155,14 @@
   }
 
   /* ---------- Submit ---------- */
+  /* Analytics may not have loaded yet; never let a missing hook break the gate. */
+  function track(name) {
+    try { if (window.mfhTrack) window.mfhTrack(name); } catch (e) { /* ignore */ }
+  }
+
   function start() {
     ensureIcons();
+    track("gate-shown");
 
     var gate  = build();
     var form  = document.getElementById("gateForm");
@@ -194,6 +200,7 @@
     }
 
     function unlock(email) {
+      if (email) track("gate-unlocked");   // the address itself is never sent
       remember(email);
       gate.classList.add("closing");
       openUp();
@@ -207,7 +214,7 @@
        no way to verify the claim, and no reason to: this is lead capture,
        not access control, and a returning subscriber hitting a wall is a
        worse outcome than an occasional unearned unlock. */
-    skip.addEventListener("click", function () { unlock(null); });
+    skip.addEventListener("click", function () { track("gate-bypassed"); unlock(null); });
 
     form.addEventListener("submit", function (e) {
       e.preventDefault();

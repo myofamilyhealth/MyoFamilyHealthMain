@@ -29,6 +29,44 @@ contact and locations — plus a dedicated self-assessment tool.
 Outbound links to the games carry `utm_source` / `utm_medium` / `utm_content` so hub
 traffic can be told apart from Instagram traffic in analytics.
 
+## Analytics
+
+GoatCounter, cookieless, on the same account as the free guides site so everything lands
+on one dashboard: **https://nathanrondoni.goatcounter.com**
+
+Page views are automatic. Click events are named and sent for the games, the assessment,
+each guide PDF, booking, the phone number, social, the email gate — and any other outbound
+link, including ones added later, which are picked up automatically from the URL.
+
+Every event from this site is prefixed `hub-` so it stays separate from the guides site,
+which posts bare `guide-<slug>` events to the same account.
+
+| Event | Fires when |
+|---|---|
+| `hub-assessment-open` | a link into the assessment is clicked |
+| `hub-assess-start-self` / `-child` | the visitor picks who they're answering for |
+| `hub-assess-complete-low` / `-mod` / `-high` | the result screen is reached |
+| `hub-assess-print` | "Save or print my result" |
+| `hub-game-sleep-lab`, `hub-game-myoland` | a game is opened |
+| `hub-guide-<slug>` | a guide PDF is opened |
+| `hub-guides-site` | the guides landing page is opened |
+| `hub-booking`, `hub-call` | booking page, phone number |
+| `hub-gate-shown` / `-unlocked` / `-bypassed` | email gate lifecycle |
+| `hub-out-<host><path>` | any other outbound link |
+
+Configured at the top of `js/analytics.js`: `window.GC_CODE` (same variable name the guides
+site uses), plus `prefix`, `trackResultBand` and `debug`. Setting `GC_CODE` to `""` turns
+tracking off entirely with no other change.
+
+`analytics.js` must stay ahead of `gate.js` in the `<head>` — deferred scripts run in
+document order, and the gate reports `hub-gate-shown` on its very first call.
+
+**What it can and cannot tell you.** GoatCounter gives counts, not people: "23 opened Sleep
+Lab today", never "this visitor opened Sleep Lab". No cookies, no identifier, no way to
+follow one person between events. Never sent: the email entered at the gate, any assessment
+answer, or anything typed into any field. The assessment reports only its outcome band; set
+`trackResultBand: false` to stop even that.
+
 ## The email access gate
 
 Visitors give an email address before the site unlocks. The address goes straight to the
