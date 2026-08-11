@@ -7,19 +7,28 @@
 :root {
   /* Brand palette — sampled from the Myo Family Health logo */
   --teal:        #78B4B4;   /* tree-of-life teal */
-  --teal-deep:   #457F7C;   /* darker teal for buttons & small text */
+  --teal-deep:   #457F7C;   /* darker teal for button fills & icons */
   --teal-ink:    #35625F;   /* deepest teal for hovers */
+  /* --teal-deep is the logo-sampled brand teal and stays exactly as it is for
+     fills and large type. On the mint and off-white panels it only reaches
+     4.1–4.4:1 behind small labels, so those use this slightly deeper tone. */
+  --teal-text:   #3E7370;
+  --teal-abyss:  #2A504E;   /* closing stop for the two white-on-teal gradients */
   --mint:        #EAF4F3;
   --mint-deep:   #DCECEA;
   --slate:       #3C4242;   /* logo wordmark charcoal */
   --slate-soft:  #64706F;
-  --slate-faint: #93A09F;
+  /* Darkened from #93A09F, which sat at 2.7:1 on white and 2.4:1 on mint —
+     under WCAG AA. This tier carries the medical disclaimer and the legal
+     footer, so it has to be readable, not just decorative. Now 4.6:1 on white. */
+  --slate-faint: #6B7877;
   --offwhite:    #F8FAF9;
   --white:       #FFFFFF;
   --sage:        #9CC6C4;   /* light tint of the brand teal */
   --sage-deep:   #5FA09D;
   --sand:        #F0EDE5;   /* warm neutral for family warmth */
   --clay:        #C8896B;   /* warm accent, used sparingly */
+  --clay-deep:   #A8613F;   /* same accent, dark enough to carry white text */
   --line:        rgba(60, 66, 66, 0.10);
 
   /* Type */
@@ -113,7 +122,7 @@ button { font-family: inherit; cursor: pointer; }
   font-weight: 600;
   letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: var(--teal-deep);
+  color: var(--teal-text);
 }
 .eyebrow::before {
   content: "";
@@ -176,7 +185,7 @@ button { font-family: inherit; cursor: pointer; }
 
 .btn-ghost {
   background: transparent;
-  color: var(--teal-deep);
+  color: var(--teal-text);
   border-color: rgba(69, 127, 124, 0.35);
 }
 .btn-ghost:hover {
@@ -359,7 +368,7 @@ button { font-family: inherit; cursor: pointer; }
   border-radius: var(--r-pill);
   font-size: 14px;
   font-weight: 600;
-  color: var(--teal-deep);
+  color: var(--teal-text);
 }
 .badge .ic {
   display: grid; place-items: center;
@@ -432,7 +441,9 @@ button { font-family: inherit; cursor: pointer; }
 }
 
 .hub-tile.feature {
-  background: linear-gradient(150deg, var(--teal-deep) 0%, var(--teal-ink) 100%);
+  /* Opens on --teal-ink rather than --teal-deep: at #457F7C even pure white
+     only reaches 4.59:1, so the 0.82-alpha subtext could not clear AA at all. */
+  background: linear-gradient(150deg, var(--teal-ink) 0%, var(--teal-abyss) 100%);
   border-color: transparent;
   color: #fff;
   box-shadow: var(--sh-md);
@@ -451,7 +462,9 @@ button { font-family: inherit; cursor: pointer; }
   letter-spacing: 0.09em;
   text-transform: uppercase;
   color: #fff;
-  background: var(--clay);
+  /* --clay itself only carries white at 2.9:1; this deeper terracotta keeps
+     the warm accent while clearing AA for the small bold label. */
+  background: var(--clay-deep);
   border-radius: var(--r-pill);
 }
 
@@ -562,7 +575,7 @@ button { font-family: inherit; cursor: pointer; }
   border-radius: var(--r-pill);
   font-size: 12.5px;
   font-weight: 600;
-  color: var(--teal-deep);
+  color: var(--teal-text);
 }
 .game-body .btn { margin-top: 22px; }
 
@@ -585,7 +598,8 @@ button { font-family: inherit; cursor: pointer; }
 
 /* ===================== Teal band ===================== */
 .band {
-  background: linear-gradient(160deg, var(--teal-deep) 0%, var(--teal-ink) 100%);
+  /* Same reasoning as .hub-tile.feature — the band carries 19px body copy. */
+  background: linear-gradient(160deg, var(--teal-ink) 0%, var(--teal-abyss) 100%);
   color: #fff;
   text-align: center;
 }
@@ -654,6 +668,8 @@ button { font-family: inherit; cursor: pointer; }
   color: var(--slate-faint);
 }
 .contact-row .cr-value { font-size: 17px; font-weight: 600; margin-top: 2px; overflow-wrap: anywhere; }
+/* Grows the link itself to the WCAG 2.2 24px minimum without moving the row. */
+.contact-row .cr-value a { display: inline-block; padding-block: 3px; }
 .contact-row .cr-value a:hover { color: var(--teal-deep); }
 .contact-row .cr-note { font-size: 14px; color: var(--slate-soft); margin-top: 3px; overflow-wrap: anywhere; }
 .contact-row > div { min-width: 0; }
@@ -697,10 +713,13 @@ button { font-family: inherit; cursor: pointer; }
   font-weight: 700;
   letter-spacing: 0.13em;
   text-transform: uppercase;
-  color: var(--teal-deep);
+  color: var(--teal-text);
   margin-bottom: 14px;
 }
-.footer-col ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; font-size: 15px; }
+.footer-col ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; font-size: 15px; }
+/* Padding rather than gap, so the tap target itself grows to meet the
+   WCAG 2.2 24px minimum instead of leaving dead space between links. */
+.footer-col ul a { display: inline-block; padding-block: 5px; }
 .footer-social { display: flex; gap: 10px; margin-top: 24px; }
 @media (max-width: 820px) { .footer-social { justify-content: center; } }
 .footer-social a {
@@ -719,7 +738,8 @@ button { font-family: inherit; cursor: pointer; }
   border-top: 1px solid var(--line);
   padding-block: 26px 34px;
   font-size: 13px;
-  color: var(--slate-faint);
+  /* The footer sits on mint, where --slate-faint only reaches 4.1:1. */
+  color: var(--slate-soft);
   display: flex;
   flex-wrap: wrap;
   gap: 8px 22px;
