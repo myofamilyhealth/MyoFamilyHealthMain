@@ -31,8 +31,8 @@
 
     storageKey: "mfh_access_v1",
 
-    // Brevo embedded-form endpoint — the same list as the
-    // newsletter signup section on the hub.
+    // Brevo embedded-form endpoint. The hub no longer has an on-page
+    // signup section, so this gate is now the only way onto the list.
     action: "https://e3961feb.sibforms.com/v2/serve/MUIFAIp6RUy17cEz4RshfnfNGuq1fh4h4dR952P97BU-q72mx8NAH0Cw_ri4DzhxhMjd0BeXWM6INiNIwuXmWGAV_DkUjAnCOFtfaAo2WQhZUHN4Zj8p8l7jmq8Ht-sWyTnLOAs1nYwwg73AiX6yu7EeQ5ta5xoa2FZ3LvWUM3il6nmgCsEfgw1dTeAhVOdYfY7S52lTYAW9Tti1cA=="
   };
 
@@ -209,8 +209,8 @@
       }, 500);
     }
 
-    /* Already on the list — from an earlier visit, another device, or the
-       newsletter form itself. Let them through without asking again. We have
+    /* Already on the list — from an earlier visit, another device, or any
+       other signup. Let them through without asking again. We have
        no way to verify the claim, and no reason to: this is lead capture,
        not access control, and a returning subscriber hitting a wall is a
        worse outcome than an occasional unearned unlock. */

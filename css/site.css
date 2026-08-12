@@ -579,23 +579,6 @@ button { font-family: inherit; cursor: pointer; }
 }
 .game-body .btn { margin-top: 22px; }
 
-/* ===================== Signup ===================== */
-.signup-card {
-  max-width: 700px;
-  margin-inline: auto;
-  background: var(--offwhite);
-  border: 1px solid var(--line);
-  border-radius: var(--r-lg);
-  box-shadow: var(--sh-md);
-  padding: clamp(30px, 5vw, 54px) clamp(18px, 4vw, 48px);
-  text-align: center;
-}
-.signup-card h2 { font-size: clamp(27px, 3.8vw, 40px); margin-top: 14px; }
-.signup-card .lead { margin: 16px auto 28px; max-width: 480px; color: var(--slate-soft); }
-.signup-card iframe { border-radius: var(--r-md); }
-.signup-note { margin-top: 20px; font-size: 14px; color: var(--slate-soft); }
-.signup-note b { color: var(--teal-deep); }
-
 /* ===================== Teal band ===================== */
 .band {
   /* Same reasoning as .hub-tile.feature — the band carries 19px body copy. */

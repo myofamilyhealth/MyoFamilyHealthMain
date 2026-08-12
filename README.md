@@ -1,8 +1,8 @@
 # Myo Family Health — Main Hub
 
 The single link that lives in the Myo Family Health Instagram bio. One page that gathers
-every Myo Family Health resource — assessment, games, newsletter, research library,
-contact and locations — plus a dedicated self-assessment tool.
+every Myo Family Health resource — assessment, games, research library, contact and
+locations — plus a dedicated self-assessment tool.
 
 **Breathe Better…Live Better!**
 
@@ -10,7 +10,7 @@ contact and locations — plus a dedicated self-assessment tool.
 
 | File | Contents |
 |---|---|
-| `index.html` | The hub. Hero, nine tappable link tiles (the Linktree layer), self-assessment feature, both games, "what is myofunctional therapy", newsletter signup, the free research library, booking band, contact & locations, footer with legal links. |
+| `index.html` | The hub. Hero, six tappable link tiles (the Linktree layer), self-assessment feature, the free research library, both games, "what is myofunctional therapy", booking band, contact & locations, footer. |
 | `assess.html` | The free myofunctional self-assessment — 18 questions across 4 sections, scored, with a personalised result and next steps. |
 
 ## What links where
@@ -21,7 +21,7 @@ contact and locations — plus a dedicated self-assessment tool.
 | Phone | `707.631.1550` |
 | Sleep Lab game | `https://myofamilyhealth.github.io/Sleep-Lab-Game/` |
 | MyoLand game (ages 4–8) | `https://myofamilyhealth.github.io/myo-family-health-game/` |
-| Newsletter form | Brevo (`sibforms.com`) embed — the same form as the newsletter landing page |
+| Brevo list | `sibforms.com` — reached only through the email gate; the hub has no on-page signup form |
 | Free guides (site) | `https://myofamilyhealth.github.io/instagramfree/` — the guides landing page |
 | Free guides (PDFs) | `…/instagramfree/pdfs/{breathing,tongue-posture,growing-smiles,sleep-airway}.pdf` |
 | Social | Instagram, Facebook, YouTube — all `@myofamilyhealth` |
@@ -70,14 +70,15 @@ answer, or anything typed into any field. The assessment reports only its outcom
 ## The email access gate
 
 Visitors give an email address before the site unlocks. The address goes straight to the
-same Brevo list the newsletter form feeds, so an unlock and a newsletter subscription are
-the same event.
+Brevo mailing list, so an unlock and a list subscription are the same event. Since the hub
+no longer carries an on-page signup form, this gate is the only route onto the list — which
+is why the overlay's fine print has to keep saying what the address is used for.
 
 - Configured at the top of `js/gate.js`. `scope: "site"` gates everything; `scope: "assess"`
   leaves the hub open and gates only the assessment; `enabled: false` turns it off.
 - An unlocked visitor is remembered for a year (`localStorage`), so they are asked once.
 - **"I already submitted my email"** lets returning subscribers — a second device, or
-  someone who joined through the newsletter form — straight through without asking again.
+  someone who joined the list elsewhere — straight through without asking again.
 - The email is validated client-side before anything is sent. Brevo answers
   `{"success":true}` to *any* input including malformed addresses, so that check is the
   only thing keeping typos off the list.

@@ -6,8 +6,8 @@
 
    Page views are automatic. Click events are named and sent for the
    games, the assessment, every guide PDF, booking, the phone number,
-   the newsletter, social, the email gate, and any other outbound link
-   — including links added later, which are picked up automatically.
+   social, the email gate, and any other outbound link — including
+   links added later, which are picked up automatically.
 
    ---------------------------------------------------------------
    EVENT NAMES
@@ -28,7 +28,6 @@
      hub-guides-site            opened the guides landing page
      hub-booking                opened the booking page
      hub-call                   tapped the phone number
-     hub-newsletter             jumped to the newsletter signup
      hub-social-instagram       social links (one per network)
      hub-gate-shown             the email gate was displayed
      hub-gate-unlocked          unlocked by entering an email
