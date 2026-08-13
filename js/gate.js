@@ -127,8 +127,6 @@
           '<p class="gate-msg" id="gateMsg" role="alert" aria-live="assertive"></p>',
         '</form>',
 
-        '<button class="gate-bypass" type="button" id="gateSkip">I already submitted my email</button>',
-
         '<p class="gate-fine">By entering your email you\'ll also join the free Myo Family Health newsletter — new courses, games and fresh information on breathing and sleep. We use your address for that and nothing else, we never sell or share it, and you can unsubscribe from any email.</p>',
 
         '<p class="gate-contact">Would rather just reach out? Text or call <a href="tel:+17076311550">707.631.1550</a> — we\'re happy to answer questions without any of this.</p>',
@@ -170,7 +168,6 @@
     var btn   = document.getElementById("gateBtn");
     var text  = document.getElementById("gateBtnText");
     var msg   = document.getElementById("gateMsg");
-    var skip  = document.getElementById("gateSkip");
     var busy  = false;
 
     field.focus({ preventScroll: true });
@@ -200,7 +197,7 @@
     }
 
     function unlock(email) {
-      if (email) track("gate-unlocked");   // the address itself is never sent
+      track("gate-unlocked");   // the address itself is never sent
       remember(email);
       gate.classList.add("closing");
       openUp();
@@ -208,13 +205,6 @@
         if (gate.parentNode) gate.parentNode.removeChild(gate);
       }, 500);
     }
-
-    /* Already on the list — from an earlier visit, another device, or any
-       other signup. Let them through without asking again. We have
-       no way to verify the claim, and no reason to: this is lead capture,
-       not access control, and a returning subscriber hitting a wall is a
-       worse outcome than an occasional unearned unlock. */
-    skip.addEventListener("click", function () { track("gate-bypassed"); unlock(null); });
 
     form.addEventListener("submit", function (e) {
       e.preventDefault();

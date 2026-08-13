@@ -891,23 +891,6 @@ html.gated .gate, .gate.closing { display: grid; }
 }
 .gate-msg:empty { min-height: 0; }
 
-.gate-bypass {
-  display: block;
-  margin: 10px auto 0;
-  padding: 12px 8px;     /* touch target floor */
-  min-height: 44px;
-  background: none;
-  border: 0;
-  font-family: inherit;
-  font-size: 14.5px;
-  font-weight: 500;              /* findable, but not competing with the CTA */
-  color: var(--slate-soft);
-  text-decoration: underline;
-  text-underline-offset: 3px;
-  transition: color .2s ease;
-}
-.gate-bypass:hover { color: var(--teal-deep); }
-
 .gate-fine {
   margin-top: 20px;
   font-size: 12.6px;

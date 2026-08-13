@@ -31,7 +31,6 @@
      hub-social-instagram       social links (one per network)
      hub-gate-shown             the email gate was displayed
      hub-gate-unlocked          unlocked by entering an email
-     hub-gate-bypassed          unlocked via "I already submitted"
      hub-out-<host><path>       any other outbound link
    ---------------------------------------------------------------
 
