@@ -159,6 +159,10 @@
   }
 
   function start() {
+    /* gate.js is the authority on whether to gate; the head script is only an
+       anti-flash optimisation. Assert the flag here so the overlay can never be
+       built into a document that was left ungated. */
+    html.classList.add("gated");
     ensureIcons();
     track("gate-shown");
 

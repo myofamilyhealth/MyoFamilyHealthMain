@@ -15,7 +15,14 @@
 (function () {
   try {
     var r = localStorage.getItem("mfh_access_v1");
-    if (r && JSON.parse(r).ok) return;      // returning visitor — already unlocked
+    // The age check has to be repeated here, not just in gate.js. This script
+    // decides whether "gated" is ever set, and .gate only paints under it — so
+    // skipping it on a stale record leaves the overlay invisible and the page
+    // open. 365 mirrors CONFIG.rememberDays.
+    if (r) {
+      var rec = JSON.parse(r);
+      if (rec && rec.ok && Date.now() - (rec.at || 0) < 365 * 864e5) return;
+    }
   } catch (e) { return; }                   // storage blocked — let them straight in
   document.documentElement.className += " gated";
   // Last-resort failsafe: if gate.js never executes at all, open the site.
