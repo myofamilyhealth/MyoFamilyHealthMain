@@ -579,6 +579,139 @@ button { font-family: inherit; cursor: pointer; }
 }
 .game-body .btn { margin-top: 22px; }
 
+/* ===================== Breathing pacer =====================
+   The orb's scale is transitioned, not keyframed, so JS can set
+   the duration per phase (4s in, 6s out) and the circle can never
+   drift out of step with the word next to it. */
+.bx { text-align: center; }
+
+.bx-stage {
+  position: relative;
+  display: grid;
+  place-items: center;
+  height: 260px;
+  margin-inline: auto;
+}
+.bx-compact .bx-stage { height: 148px; }
+
+.bx-orb {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  gap: 2px;
+  width: 200px; height: 200px;
+  border-radius: 50%;
+  background: linear-gradient(150deg, var(--teal-ink) 0%, var(--teal-abyss) 100%);
+  box-shadow: var(--glow);
+  color: #fff;
+  transform: scale(.58);
+  transition: transform 4000ms cubic-bezier(.37,0,.63,1);
+}
+.bx-compact .bx-orb { width: 112px; height: 112px; }
+
+/* Idle sits between the two extremes, so starting never jumps. */
+.bx[data-phase="in"]  .bx-orb { transform: scale(1); }
+.bx[data-phase="out"] .bx-orb { transform: scale(.58); }
+
+.bx-phase { font-size: 16px; font-weight: 700; letter-spacing: -0.01em; }
+.bx-compact .bx-phase { font-size: 13.5px; }
+.bx-secs {
+  font-size: 26px; font-weight: 700; font-variant-numeric: tabular-nums;
+  line-height: 1; min-height: 26px;
+}
+.bx-compact .bx-secs { font-size: 19px; min-height: 19px; }
+
+/* A soft echo of the orb — decorative only, and the first thing
+   dropped when the visitor has asked for less motion. */
+.bx-ripple {
+  position: absolute;
+  width: 200px; height: 200px;
+  border-radius: 50%;
+  background: var(--mint);
+  opacity: 0;
+  transform: scale(.58);
+  transition: transform 4000ms cubic-bezier(.37,0,.63,1), opacity 4000ms ease;
+}
+.bx-compact .bx-ripple { width: 112px; height: 112px; }
+.bx[data-state="running"] .bx-ripple { opacity: .75; }
+.bx[data-phase="in"]  .bx-ripple { transform: scale(1.28); }
+.bx[data-phase="out"] .bx-ripple { transform: scale(.58); }
+
+.bx-cue {
+  min-height: 24px;
+  margin-top: 4px;
+  font-size: 15.5px;
+  color: var(--slate-soft);
+}
+.bx-compact .bx-cue { font-size: 14px; min-height: 21px; }
+
+.bx-btn {
+  margin-top: 14px;
+  min-height: 48px;
+  padding: 13px 30px;
+  border: 1px solid rgba(69, 127, 124, 0.35);
+  border-radius: var(--r-pill);
+  background: var(--white);
+  font-family: inherit;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--teal-text);
+  transition: background .2s ease, color .2s ease, transform .2s ease;
+}
+.bx-btn:hover { background: var(--mint); }
+.bx-btn:active { transform: translateY(1px); }
+.bx-compact .bx-btn { min-height: 44px; padding: 11px 24px; font-size: 15px; }
+
+.bx-tally {
+  min-height: 20px;
+  margin-top: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--teal-text);
+}
+.bx-safety {
+  margin-top: 10px;
+  margin-inline: auto;
+  max-width: 420px;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--slate-soft);
+}
+.bx-compact .bx-safety { font-size: 12px; max-width: 300px; margin-top: 8px; }
+
+/* The hub's standalone section. */
+.breathe-panel {
+  max-width: 640px;
+  margin-inline: auto;
+  padding: clamp(26px, 4vw, 44px) clamp(18px, 4vw, 40px) clamp(30px, 4vw, 46px);
+  background: var(--white);
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  box-shadow: var(--sh-md);
+}
+
+/* The gate's compact copy, framed so it reads as a thing to do
+   rather than more of the sales pitch. */
+.gate-breathe {
+  margin: 16px 0 2px;
+  padding: 10px 12px 14px;
+  background: var(--offwhite);
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+}
+.gate-sub-2 { margin-top: 14px; }
+
+/* Reduced motion: the circle stops resizing entirely. The phase
+   word and the second-by-second countdown carry the pace instead,
+   so the exercise still works — it just stops moving. */
+@media (prefers-reduced-motion: reduce) {
+  .bx-orb { transition: none; transform: scale(.9); }
+  .bx[data-phase="in"] .bx-orb,
+  .bx[data-phase="out"] .bx-orb { transform: scale(.9); }
+  .bx-ripple { display: none; }
+}
+
 /* ===================== Teal band ===================== */
 .band {
   /* Same reasoning as .hub-tile.feature — the band carries 19px body copy. */

@@ -107,15 +107,18 @@
       '<div class="gate-card">',
         '<div class="gate-mark"><img src="assets/mfh-tree.png" alt="" aria-hidden="true" width="186" height="189" /></div>',
         '<span class="eyebrow center">Free Access</span>',
-        '<h1 id="gateTitle">Enter your email to <span class="serif-accent">unlock the hub</span></h1>',
-        '<p class="gate-sub">One step, and everything opens up — free, and free to stay.</p>',
+        '<h1 id="gateTitle">Breathe with us for <span class="serif-accent">one minute</span></h1>',
+        '<p class="gate-sub">No email needed for this part. Follow the circle — in through the nose, out slow.</p>',
 
-        '<div class="gate-perks">',
-          '<div><svg aria-hidden="true"><use href="#ic-check"/></svg>The 2-minute myofunctional self-assessment</div>',
-          '<div><svg aria-hidden="true"><use href="#ic-check"/></svg>Sleep Lab and MyoLand — both games, free to play</div>',
-          '<div><svg aria-hidden="true"><use href="#ic-check"/></svg>The full research library, plus new courses as they land</div>',
-        '</div>',
+        /* The pacer sits above the form on purpose. A visitor who has
+           actually done something is being asked for an address by a
+           site that already gave them something. */
+        '<div class="gate-breathe" id="gateBreathe"></div>',
 
+        '<p class="gate-sub gate-sub-2">When you\'re ready, the rest of the hub is free too.</p>',
+
+        /* Form before the perks: someone who came to get in should not have
+           to scroll past a feature list to find the field. */
         '<form class="gate-form" id="gateForm" novalidate>',
           '<label for="gateEmail" class="sr-only" style="position:absolute;left:-9999px">Your email address</label>',
           '<input class="gate-field" id="gateEmail" name="EMAIL" type="email" inputmode="email" ',
@@ -126,6 +129,12 @@
           '</button>',
           '<p class="gate-msg" id="gateMsg" role="alert" aria-live="assertive"></p>',
         '</form>',
+
+        '<div class="gate-perks">',
+          '<div><svg aria-hidden="true"><use href="#ic-check"/></svg>The 2-minute myofunctional self-assessment</div>',
+          '<div><svg aria-hidden="true"><use href="#ic-check"/></svg>Sleep Lab and MyoLand — both games, free to play</div>',
+          '<div><svg aria-hidden="true"><use href="#ic-check"/></svg>The full research library, plus new courses as they land</div>',
+        '</div>',
 
         '<p class="gate-fine">By entering your email you\'ll also join the free Myo Family Health newsletter — new courses, games and fresh information on breathing and sleep. We use your address for that and nothing else, we never sell or share it, and you can unsubscribe from any email.</p>',
 
@@ -167,6 +176,18 @@
     track("gate-shown");
 
     var gate  = build();
+
+    /* Optional by design: if breathe.js is missing or throws, the gate
+       is still a working gate. Nothing below depends on it. */
+    try {
+      if (window.mfhBreathe) {
+        window.mfhBreathe.mount(document.getElementById("gateBreathe"), {
+          compact: true,
+          startLabel: "Start"
+        });
+      }
+    } catch (e) { /* no-op */ }
+
     var form  = document.getElementById("gateForm");
     var field = document.getElementById("gateEmail");
     var btn   = document.getElementById("gateBtn");

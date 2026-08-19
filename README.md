@@ -52,6 +52,7 @@ which posts bare `guide-<slug>` events to the same account.
 | `hub-guides-site` | the guides landing page is opened |
 | `hub-booking`, `hub-call` | booking page, phone number |
 | `hub-gate-shown` / `-unlocked` | email gate lifecycle |
+| `hub-breathe-start` / `-3` | breathing pacer started / three breaths completed |
 | `hub-out-<host><path>` | any other outbound link |
 
 Configured at the top of `js/analytics.js`: `window.GC_CODE` (same variable name the guides
@@ -89,6 +90,37 @@ gate that locks people out of a healthcare site on a network error is worse than
 > **This is lead capture, not access control.** The site is public and static — the HTML,
 > CSS and JS are readable by anyone who views source, and the gate is bypassed by turning
 > JavaScript off. Never put anything confidential behind it.
+
+## The breathing pacer
+
+A circle that grows for four seconds on the inhale and shrinks for six on the exhale.
+The long exhale is the point — it is the half that settles the nervous system, and the
+half people skip. There are deliberately **no breath-holds**: this audience includes
+people being screened for sleep-disordered breathing, and a hold is the one phase that
+can make air hunger worse.
+
+`js/breathe.js` defines it once and mounts it in two places:
+
+- **Inside the email gate**, compact, *above* the form. It is the first thing a visitor
+  can actually do, and it needs no email — so the address is asked for by a site that has
+  already given something. The gate's own copy leads with it ("Breathe with us for one
+  minute").
+- **On the hub** as the `#breathe` section, which is the reason to come back on an
+  ordinary day rather than once.
+
+Any `.breathe-panel` on the page is mounted automatically; the gate mounts its own copy
+by hand with `{ compact: true }`.
+
+- It is presentation only. Nothing is timed against a hidden clock, stored, or sent.
+- The pacer **cannot unlock the site** — only submitting a valid address does.
+- `gate.js` mounts it inside a `try`, so a missing or broken `breathe.js` leaves a
+  working gate behind.
+- It stops itself when the tab is hidden, rather than drifting out of sync with a person
+  who walked away.
+- Under `prefers-reduced-motion` the circle stops resizing entirely and the phase word
+  plus a second-by-second countdown carry the pace instead — the exercise still works, it
+  just stops moving.
+- A safety line sits under it: breathe gently, stop if you feel light-headed.
 
 ## The self-assessment
 
@@ -130,6 +162,7 @@ index.html      hub page
 assess.html     self-assessment
 css/site.css    design tokens + every component, shared by both pages
 js/gate.js      email access gate (config block at the top of the file)
+js/breathe.js   guided nasal breathing pacer (gate + hub section)
 js/site.js      nav shadow, mobile drawer, reveal-on-scroll
 js/assess.js    assessment questions, scoring, result rendering
 assets/         brand marks (logo, tree, square social image)
