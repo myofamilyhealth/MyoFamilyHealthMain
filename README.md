@@ -53,6 +53,7 @@ which posts bare `guide-<slug>` events to the same account.
 | `hub-booking`, `hub-call` | booking page, phone number |
 | `hub-gate-shown` / `-unlocked` | email gate lifecycle |
 | `hub-breathe-start` / `-3` | breathing pacer started / three breaths completed |
+| `hub-assess-sent` | a visitor chose to send their result to Amy |
 | `hub-out-<host><path>` | any other outbound link |
 
 Configured at the top of `js/analytics.js`: `window.GC_CODE` (same variable name the guides
@@ -122,6 +123,58 @@ by hand with `{ compact: true }`.
   just stops moving.
 - A safety line sits under it: breathe gently, stop if you feel light-headed.
 
+## Collecting assessment results
+
+The assessment stays private by default. `js/collect.js` adds one thing: a card on
+the result screen offering to send that result to Amy, and it **only ever sends when
+the visitor taps it**. Finishing the assessment sends nothing.
+
+**It is off until configured, and the page's copy follows the switch.** With
+`CONFIG.action` empty, `mfhCollect.ready()` is false, no card renders, nothing is
+transmitted, and assess.html's "Nothing you answer is sent anywhere" stands unaltered
+and true. Fill the config in and `collect.js` rewrites those two lines itself — the
+badge becomes "Private — you choose what to send" and the intro gains "nothing is sent
+unless you do". The promise on the page and the behaviour of the code are driven by the
+same switch, so they cannot drift apart. Never hand-edit one without the other.
+
+### Setting it up
+
+1. **Build a Google Form** with a short-answer question per column you want. A
+   sensible order: email, who it's for, score, percent, band, flags, then one per
+   assessment question (18). Point its responses at a Sheet.
+2. **Pull the field IDs** — Google hides them in the page source, so:
+   ```bash
+   tools/form-fields.sh 'https://docs.google.com/forms/d/e/YOUR_FORM/viewform'
+   ```
+   It prints the `formResponse` action URL and every `entry.NNNNNNN` with its question
+   title, in form order.
+3. **Paste them into the CONFIG block** at the top of `js/collect.js`. `answers` takes
+   18 ids in assessment order. Any field left blank is simply omitted from the POST, so
+   a half-filled config sends less rather than failing.
+
+Google's `formResponse` endpoint takes an ordinary POST and needs no API key — which
+matters here, because anything secret placed in this file would be readable by anyone
+viewing source on a static site.
+
+### What gets sent, and what doesn't
+
+Sent, and only on a tap: the email (reused from the gate, never re-typed), whether the
+answers were for themselves or a child, the score, percentage, band, which red flags
+fired, and all 18 answers **as the words the visitor saw** — "Yes" / "Sometimes" /
+"No", not indices — so the Sheet is readable without a decoder.
+
+Never sent: anything at all before the tap. The reply is unreadable by design (Google
+sends no CORS headers on `formResponse`, so the request goes out `no-cors`), which
+means the card can honestly say "sent" and nothing more. The button disables itself
+afterwards so a result cannot be submitted twice.
+
+> **This is identifiable health information.** Snoring, witnessed apneas, a child's
+> feeding history — tied to an email address. Before switching it on, the site needs a
+> privacy policy that says you collect it, and the destination needs to be somewhere
+> appropriate to keep it. A consumer Google account is not covered by a HIPAA business
+> associate agreement; if this data informs care you provide, take advice on where it
+> is allowed to live.
+
 ## The self-assessment
 
 Eighteen questions in four sections — **Breathing & Airway** (6), **Sleep & Rest** (6),
@@ -135,8 +188,8 @@ Yes (2) / Sometimes (1) / No (0), for a maximum of 36.
 - Five specific answers raise a **"worth raising with a provider soon"** flag — witnessed
   apneas or gasping, habitual snoring, daytime sleepiness, a known tongue tie, and a
   tongue that can't reach the palate.
-- Answers never leave the browser. Nothing is submitted, stored or transmitted, and no
-  email is required to see a result. "Save or print my result" uses the browser's own
+- Answers never leave the browser on their own, and no email is required to see a
+  result. Result sharing is opt-in and off unless configured — see above. "Save or print my result" uses the browser's own
   print dialog, and a print stylesheet strips the navigation and buttons.
 
 The result page ends on a single next step: book a free consultation.
@@ -163,6 +216,8 @@ assess.html     self-assessment
 css/site.css    design tokens + every component, shared by both pages
 js/gate.js      email access gate (config block at the top of the file)
 js/breathe.js   guided nasal breathing pacer (gate + hub section)
+js/collect.js   opt-in result sharing (config block at the top of the file)
+tools/          form-fields.sh — pulls entry IDs out of a Google Form
 js/site.js      nav shadow, mobile drawer, reveal-on-scroll
 js/assess.js    assessment questions, scoring, result rendering
 assets/         brand marks (logo, tree, square social image)

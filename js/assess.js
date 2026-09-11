@@ -432,7 +432,56 @@
     document.getElementById("qzNextTitle").textContent = v.nextTitle;
     document.getElementById("qzNextCopy").textContent = v.nextCopy;
 
+    /* Offer to send the result to Amy. Opt-in only, and only when
+       collect.js has been configured with somewhere to send it —
+       otherwise the answers stay where the page says they stay. */
+    try {
+      var share = document.getElementById("qzShare");
+      if (share && window.mfhCollect && window.mfhCollect.ready()) {
+        window.mfhCollect.offer(share, buildPayload(r, v));
+      } else if (share) {
+        share.hidden = true;
+      }
+    } catch (e) { /* sharing must never break the result */ }
+
     scrollToCard();
+  }
+
+  /* Flattens the result into something a person can read in a
+     spreadsheet row: the wording the visitor actually saw, and the
+     answer they actually gave, not indices. */
+  function buildPayload(r, v) {
+    var out = [];
+    var n = 0;
+    SECTIONS.forEach(function (sec, si) {
+      sec.questions.forEach(function (q, qi) {
+        n += 1;
+        var val = answers[si + "." + qi];
+        var opt = null;
+        for (var i = 0; i < OPTIONS.length; i++) {
+          if (OPTIONS[i].value === val) { opt = OPTIONS[i]; break; }
+        }
+        out.push({
+          n: n,
+          section: sec.name,
+          question: phrase(q),
+          value: val === undefined ? null : val,
+          label: opt ? opt.label : "(not answered)"
+        });
+      });
+    });
+
+    return {
+      subject: subject,
+      total: r.total,
+      max: MAX_TOTAL,
+      pct: r.pct,
+      tier: r.tier,
+      bandLabel: v.label,
+      flags: r.flags.map(function (f) { return f.at; }),
+      cats: r.cats.map(function (c) { return c.name + ": " + c.sum + "/" + c.max; }),
+      answers: out
+    };
   }
 
   function countUp(el, target) {
@@ -468,6 +517,8 @@
     answers = {};
     elSections.innerHTML = "";
     elResult.classList.remove("active");
+    var share = document.getElementById("qzShare");
+    if (share) { share.innerHTML = ""; share.hidden = true; }
     goTo(-1);
   });
 

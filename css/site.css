@@ -1310,8 +1310,67 @@ html.gated .gate, .gate.closing { display: grid; }
 }
 .qz-medical strong { color: var(--slate); }
 
+/* ===================== Result sharing (opt-in) =====================
+   Deliberately styled as an offer, not as part of the result. It sits
+   apart from the score so it reads as a separate decision the visitor
+   is making, rather than the next step in a flow they're already in. */
+.qz-share-slot { margin-top: clamp(24px, 3vw, 34px); }
+
+.qz-share {
+  padding: clamp(22px, 3.4vw, 30px) clamp(18px, 3vw, 28px);
+  background: var(--mint);
+  border: 1px solid var(--mint-deep);
+  border-radius: var(--r-md);
+  text-align: center;
+}
+.qz-share h3 { font-size: clamp(19px, 2.2vw, 22px); }
+.qz-share > p {
+  margin: 10px auto 0;
+  max-width: 460px;
+  font-size: 15px;
+  color: var(--slate-soft);
+}
+
+.qz-share-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-width: 380px;
+  margin: 18px auto 0;
+}
+.qz-share-form .btn { width: 100%; }
+.qz-share-as { font-size: 14.5px; color: var(--slate-soft); margin: 0; }
+.qz-share-as strong { color: var(--slate); overflow-wrap: anywhere; }
+.qz-share-label {
+  font-size: 13px;
+  font-weight: 600;
+  text-align: left;
+  color: var(--slate-soft);
+}
+.qz-share.invalid .gate-field { border-color: var(--clay-deep); }
+
+.qz-share-msg {
+  min-height: 20px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--teal-text);
+}
+.qz-share.invalid .qz-share-msg { color: var(--clay-deep); }
+
+.qz-share-fine {
+  margin: 14px auto 0;
+  max-width: 420px;
+  font-size: 12.6px;
+  line-height: 1.6;
+  color: var(--slate-soft);
+}
+
+/* Once sent, the card stops inviting and starts confirming. */
+.qz-share.done { background: var(--white); border-color: var(--line); }
+.qz-share.done .btn { pointer-events: none; opacity: .72; }
+
 @media print {
-  .nav, .drawer, .qz-actions, .qz-next-grid a.btn, .footer-social, .skip-link { display: none !important; }
+  .nav, .drawer, .qz-actions, .qz-share-slot, .qz-next-grid a.btn, .footer-social, .skip-link { display: none !important; }
   body { background: #fff; font-size: 13px; }
   .qz-card { box-shadow: none; border: 1px solid #ccc; }
 }
