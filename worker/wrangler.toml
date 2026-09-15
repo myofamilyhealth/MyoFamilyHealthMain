@@ -20,4 +20,4 @@ ALLOWED_ORIGINS = "https://myofamilyhealth.github.io"
 [[d1_databases]]
 binding = "DB"
 database_name = "myo-assessments"
-database_id = "PASTE_YOUR_DATABASE_ID_HERE"
+database_id = "1b7707b7-16e2-40b6-8a2a-627bc4079e26"
