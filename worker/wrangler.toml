@@ -1,0 +1,23 @@
+# Myo Family Health — assessment collection + owner dashboard
+#
+# Deploy:
+#   npm install -g wrangler
+#   wrangler login
+#   wrangler d1 create myo-assessments        # paste the id below
+#   wrangler d1 execute myo-assessments --remote --file=schema.sql
+#   wrangler secret put ADMIN_PASSWORD        # what Amy types to log in
+#   wrangler secret put SESSION_SECRET        # any long random string
+#   wrangler deploy
+
+name = "myo-assessments"
+main = "src/index.js"
+compatibility_date = "2026-01-01"
+
+[vars]
+# Only these origins may submit. Anything else is refused.
+ALLOWED_ORIGINS = "https://myofamilyhealth.github.io"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "myo-assessments"
+database_id = "PASTE_YOUR_DATABASE_ID_HERE"

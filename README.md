@@ -137,43 +137,71 @@ badge becomes "Private — you choose what to send" and the intro gains "nothing
 unless you do". The promise on the page and the behaviour of the code are driven by the
 same switch, so they cannot drift apart. Never hand-edit one without the other.
 
-### Setting it up
+### Where it goes
 
-1. **Build a Google Form** with a short-answer question per column you want. A
-   sensible order: email, who it's for, score, percent, band, flags, then one per
-   assessment question (18). Point its responses at a Sheet.
-2. **Pull the field IDs** — Google hides them in the page source, so:
-   ```bash
-   tools/form-fields.sh 'https://docs.google.com/forms/d/e/YOUR_FORM/viewform'
-   ```
-   It prints the `formResponse` action URL and every `entry.NNNNNNN` with its question
-   title, in form order.
-3. **Paste them into the CONFIG block** at the top of `js/collect.js`. `answers` takes
-   18 ids in assessment order. Any field left blank is simply omitted from the POST, so
-   a half-filled config sends less rather than failing.
+A Cloudflare Worker in `worker/`, backed by a D1 database. Both belong to the practice;
+no third party holds the data. The Worker does two things: takes submissions from the
+site, and serves Amy a dashboard at `/admin` behind a password.
 
-Google's `formResponse` endpoint takes an ordinary POST and needs no API key — which
-matters here, because anything secret placed in this file would be readable by anyone
-viewing source on a static site.
+**The dashboard lives in the Worker, not on the static site, and that is the whole
+point.** A password checked in browser JavaScript is readable by everyone it is meant
+to keep out, and a Google Sheet "published to the web" is public to anyone holding the
+link. Neither is acceptable for children's sleep and feeding histories. The password
+here is checked server-side against an encrypted secret that never enters the
+repository.
 
-### What gets sent, and what doesn't
+### Deploying it
 
-Sent, and only on a tap: the email (reused from the gate, never re-typed), whether the
-answers were for themselves or a child, the score, percentage, band, which red flags
-fired, and all 18 answers **as the words the visitor saw** — "Yes" / "Sometimes" /
-"No", not indices — so the Sheet is readable without a decoder.
+```bash
+cd worker
+npm install -g wrangler
+wrangler login
+wrangler d1 create myo-assessments        # paste the id into wrangler.toml
+wrangler d1 execute myo-assessments --remote --file=schema.sql
+wrangler secret put ADMIN_PASSWORD        # what Amy types to sign in
+wrangler secret put SESSION_SECRET        # any long random string
+wrangler deploy
+```
 
-Never sent: anything at all before the tap. The reply is unreadable by design (Google
-sends no CORS headers on `formResponse`, so the request goes out `no-cors`), which
-means the card can honestly say "sent" and nothing more. The button disables itself
-afterwards so a result cannot be submitted twice.
+Then paste the Worker's `/api/submit` URL into `CONFIG.action` at the top of
+`js/collect.js`. That is the only wiring the site needs — no key, no field ids.
+
+| Route | |
+|---|---|
+| `POST /api/submit` | the site sends a result here; CORS-locked to `ALLOWED_ORIGINS` |
+| `GET /admin` | dashboard, or the sign-in form |
+| `GET /api/responses` | JSON for the dashboard — 401 without a session |
+| `GET /api/export.csv` | every response as a spreadsheet — 401 without a session |
+
+### How it holds up
+
+- **Sessions** are a signed cookie: an expiry plus an HMAC of it, `HttpOnly`, `Secure`,
+  `SameSite=Strict`, 12 hours. Nothing is stored server-side, so there is no session
+  table to leak, and a forged or edited cookie fails the signature check.
+- **Passwords** are compared in constant time, and eight wrong guesses in an hour closes
+  the door for thirty minutes.
+- **Every submission is re-validated in the Worker** — email shape, known subject and
+  band values, numeric ranges, array lengths, per-field length caps. The row is built
+  field by field rather than spread from the request body, and every query is
+  parameterised.
+- **Only listed origins may submit.** Anything else gets a 403 before it reaches the
+  database.
+
+### What is stored, and what is not
+
+Stored: when, the email, an optional name, whether the answers were for themselves or a
+child, the score, percentage, band, which red flags fired, the per-section breakdown,
+and all 18 answers as the words the visitor saw — "Yes" / "Sometimes" / "No", not
+indices, so the table and the CSV read without a decoder.
+
+Not stored: IP address, user agent, or any other fingerprint. The schema has no column
+for them. Nothing at all is stored before the visitor taps send.
 
 > **This is identifiable health information.** Snoring, witnessed apneas, a child's
-> feeding history — tied to an email address. Before switching it on, the site needs a
-> privacy policy that says you collect it, and the destination needs to be somewhere
-> appropriate to keep it. A consumer Google account is not covered by a HIPAA business
-> associate agreement; if this data informs care you provide, take advice on where it
-> is allowed to live.
+> feeding history — tied to an email address. The site needs a privacy policy saying you
+> collect it before this is switched on. If it informs care you provide, take advice on
+> whether it may live here at all: Cloudflare will sign a business associate agreement
+> on enterprise plans, and the free tier is not covered by one.
 
 ## The self-assessment
 
@@ -217,7 +245,7 @@ css/site.css    design tokens + every component, shared by both pages
 js/gate.js      email access gate (config block at the top of the file)
 js/breathe.js   guided nasal breathing pacer (gate + hub section)
 js/collect.js   opt-in result sharing (config block at the top of the file)
-tools/          form-fields.sh — pulls entry IDs out of a Google Form
+worker/         Cloudflare Worker + D1: submissions and the owner dashboard
 js/site.js      nav shadow, mobile drawer, reveal-on-scroll
 js/assess.js    assessment questions, scoring, result rendering
 assets/         brand marks (logo, tree, square social image)

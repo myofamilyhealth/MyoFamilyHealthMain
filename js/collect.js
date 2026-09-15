@@ -14,37 +14,24 @@
    cannot drift apart.
 
    WHERE IT GOES
-   A Google Form you own, which writes to a Sheet you own. The
-   form's formResponse endpoint takes an ordinary POST and needs
-   no API key, which matters on a static site: anything secret
-   put in this file would be readable by anyone viewing source.
+   A Cloudflare Worker you own (see worker/), which writes to a
+   database you own and serves Amy a dashboard behind a real
+   login. This file holds only the public submit URL — no key, no
+   password, nothing secret. That is the point: anything secret
+   put here would be readable by anyone viewing source.
 
    SETUP  (see README, "Collecting assessment results")
-     1. Build the Google Form.
-     2. Run tools/form-fields.sh <your form URL> to pull the
-        entry IDs out of it.
-     3. Paste the action URL and the IDs below.
+     1. Deploy worker/ — the README has the five commands.
+     2. Paste the Worker's /api/submit URL below.
    ============================================================ */
 (function () {
   "use strict";
 
   var CONFIG = {
-    /* The form's POST endpoint. Looks like:
-       https://docs.google.com/forms/d/e/FORM_ID/formResponse
+    /* The Worker's submit endpoint. Looks like:
+       https://myo-assessments.<subdomain>.workers.dev/api/submit
        Leave empty to keep result sharing switched off entirely. */
     action: "",
-
-    /* entry.NNNNNNN ids from your form. `answers` holds 18 of
-       them, in the order the questions appear in the assessment. */
-    fields: {
-      email:   "",
-      subject: "",
-      score:   "",
-      percent: "",
-      band:    "",
-      flags:   "",
-      answers: []
-    },
 
     /* Offer an optional name box alongside the email. */
     askName: false,
@@ -53,7 +40,7 @@
   };
 
   function ready() {
-    return !!(CONFIG.action && CONFIG.fields.email);
+    return !!CONFIG.action;
   }
 
   function track(name) {
@@ -74,38 +61,33 @@
     return v.length >= 6 && v.length <= 254 && EMAIL_RE.test(v);
   }
 
-  /* ---------- Build the POST body ----------
-     Only fields that have been given an entry id are included, so
-     a partially configured form degrades to sending less rather
-     than sending nothing. */
-  function body(payload, email, name) {
-    var f = CONFIG.fields;
-    var b = new URLSearchParams();
-
-    if (f.email)   b.set(f.email, email);
-    if (f.subject) b.set(f.subject, payload.subject === "child" ? "For their child" : "For themselves");
-    if (f.score)   b.set(f.score, payload.total + " of " + payload.max);
-    if (f.percent) b.set(f.percent, payload.pct + "%");
-    if (f.band)    b.set(f.band, payload.bandLabel);
-    if (f.flags)   b.set(f.flags, payload.flags.length ? payload.flags.join(" | ") : "none");
-    if (name && f.name) b.set(f.name, name);
-
-    for (var i = 0; i < payload.answers.length; i++) {
-      var id = f.answers[i];
-      if (id) b.set(id, payload.answers[i].label);
-    }
-    return b;
-  }
-
-  /* Google does not send CORS headers on formResponse, so the reply
-     is unreadable by design. no-cors still delivers the request; it
-     just means we can never claim more than "sent". */
+  /* The Worker answers with CORS headers, so unlike a third-party
+     form endpoint the reply is readable and the card can tell the
+     truth about whether the result actually saved. */
   function post(payload, email, name) {
+    var b = {
+      email: email,
+      subject: payload.subject,
+      total: payload.total,
+      max: payload.max,
+      pct: payload.pct,
+      tier: payload.tier,
+      bandLabel: payload.bandLabel,
+      flags: payload.flags,
+      cats: payload.cats,
+      answers: payload.answers.map(function (a) {
+        return { n: a.n, section: a.section, question: a.question, label: a.label };
+      })
+    };
+    if (name) b.name = name;
+
     return fetch(CONFIG.action, {
       method: "POST",
-      mode: "no-cors",
-      body: body(payload, email, name),
-      headers: { "Content-Type": "application/x-www-form-urlencoded" }
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(b)
+    }).then(function (res) {
+      if (!res.ok) throw new Error("save failed");
+      return res.json();
     });
   }
 
@@ -169,14 +151,21 @@
       btnT.textContent = "Sending…";
 
       post(payload, addr, nameF ? nameF.value.trim() : "")
-        .then(done, done);
-
-      function done() {
-        track("assess-sent");
-        card.classList.add("done");
-        btnT.textContent = "Sent to Amy";
-        msg.textContent = "Thank you — Amy has your result. She'll bring it to your consultation.";
-      }
+        .then(function () {
+          track("assess-sent");
+          card.classList.add("done");
+          btnT.textContent = "Sent to Amy";
+          msg.textContent = "Thank you — Amy has your result. She'll bring it to your consultation.";
+        })
+        .catch(function () {
+          /* Say so rather than claiming a save that did not happen —
+             the visitor can retry, and their result is still on screen. */
+          sent = false;
+          btn.disabled = false;
+          card.classList.add("invalid");
+          btnT.textContent = "Try again";
+          msg.textContent = "That didn't go through. Please try again, or bring your result to your consultation.";
+        });
     });
   }
 
