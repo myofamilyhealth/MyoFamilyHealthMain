@@ -311,20 +311,34 @@ function html(body, status = 200) {
 
 export default {
   async fetch(request, env) {
-    const url = new URL(request.url);
-    const path = url.pathname.replace(/\/+$/, "") || "/";
-
-    if (request.method === "OPTIONS") {
-      const cors = corsHeaders(request, env);
-      return cors ? new Response(null, { status: 204, headers: cors })
-                  : new Response(null, { status: 403 });
-    }
-
     try {
-      if (path === "/api/submit" && request.method === "POST") return submit(request, env);
-      if (path === "/api/responses") return listResponses(request, env);
-      if (path === "/api/export.csv") return exportCsv(request, env);
-      if (path === "/admin/login" && request.method === "POST") return login(request, env);
+      const url = new URL(request.url);
+      const path = url.pathname.replace(/\/+$/, "") || "/";
+
+      if (request.method === "OPTIONS") {
+        const cors = corsHeaders(request, env);
+        return cors ? new Response(null, { status: 204, headers: cors })
+                    : new Response(null, { status: 403 });
+      }
+
+      /* Say what is missing rather than failing opaquely. A half-configured
+         Worker is the normal state during setup, and "Error 1101" tells the
+         person doing the setup nothing at all. */
+      const missing = configProblems(env);
+      if (missing.length) {
+        if (path.startsWith("/api/")) return json({ error: "worker not configured", missing }, 503);
+        return html(setupPage(missing), 503);
+      }
+
+      /* Every one of these is awaited. Returning the promise bare would let a
+         rejection escape this try entirely — the async function adopts the
+         promise only after the block has exited — which surfaces as an
+         uncaught exception (Cloudflare error 1101) instead of the handled
+         response below. */
+      if (path === "/api/submit" && request.method === "POST") return await submit(request, env);
+      if (path === "/api/responses") return await listResponses(request, env);
+      if (path === "/api/export.csv") return await exportCsv(request, env);
+      if (path === "/admin/login" && request.method === "POST") return await login(request, env);
       if (path === "/admin/logout") return logout();
 
       if (path === "/admin" || path === "/") {
@@ -332,12 +346,46 @@ export default {
       }
       return new Response("Not found", { status: 404 });
     } catch (err) {
-      // Never leak internals to the caller.
+      const detail = (err && err.message) ? String(err.message) : "unknown error";
       console.error(err && err.stack || err);
-      return json({ error: "server error" }, 500);
+      const wantsHtml = (request.headers.get("Accept") || "").includes("text/html");
+      return wantsHtml
+        ? html(errorPage(detail), 500)
+        : json({ error: "server error", detail }, 500);
     }
   }
 };
+
+/* ---------- configuration ---------- */
+
+function configProblems(env) {
+  const missing = [];
+  if (!env.DB || typeof env.DB.prepare !== "function") {
+    missing.push({
+      what: "D1 database binding named DB",
+      how: "Settings \u2192 Bindings \u2192 Add \u2192 D1 database. Variable name must be exactly DB."
+    });
+  }
+  if (!env.ADMIN_PASSWORD) {
+    missing.push({
+      what: "ADMIN_PASSWORD secret",
+      how: "Settings \u2192 Variables and Secrets \u2192 Add \u2192 type Secret."
+    });
+  }
+  if (!env.SESSION_SECRET) {
+    missing.push({
+      what: "SESSION_SECRET secret",
+      how: "Settings \u2192 Variables and Secrets \u2192 Add \u2192 type Secret. Any long random string."
+    });
+  }
+  if (!env.ALLOWED_ORIGINS) {
+    missing.push({
+      what: "ALLOWED_ORIGINS variable",
+      how: "Settings \u2192 Variables and Secrets \u2192 Add \u2192 type Text \u2192 https://myofamilyhealth.github.io"
+    });
+  }
+  return missing;
+}
 
 /* ---------- pages ----------
    Inlined so the dashboard has no assets to fetch and nothing to
@@ -500,4 +548,48 @@ document.getElementById("q").addEventListener("input", function (e) {
 });
 load("");
 </script></div></body></html>`;
+}
+
+function setupPage(missing) {
+  return `<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Finish setting up — Myo Family Health</title><style>${SHELL}
+.box{max-width:560px;margin:9vh auto;padding:32px 30px;background:#fff;
+border:1px solid var(--line);border-radius:22px}
+h1{font-size:22px;margin-bottom:6px}
+p.lead{color:var(--slate-soft);font-size:15px;margin:0 0 20px}
+li{margin-bottom:14px}
+b{display:block}
+span{color:var(--slate-soft);font-size:14px}
+ol{padding-left:20px;margin:0}
+.after{margin-top:22px;padding-top:18px;border-top:1px solid var(--line);
+color:var(--slate-soft);font-size:14px}
+</style></head><body><div class="box">
+<h1>Nearly there</h1>
+<p class="lead">The Worker is deployed and running. It still needs ${missing.length}
+${missing.length === 1 ? "thing" : "things"} before it can store or show anything.</p>
+<ol>${missing.map(m => `<li><b>${m.what}</b><span>${m.how}</span></li>`).join("")}</ol>
+<p class="after">Add these on the Worker in the Cloudflare dashboard, deploy again, then
+reload this page. Nothing is stored until all of them are in place.</p>
+</div></body></html>`;
+}
+
+function errorPage(detail) {
+  return `<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Something went wrong</title><style>${SHELL}
+.box{max-width:520px;margin:12vh auto;padding:32px 30px;background:#fff;
+border:1px solid var(--line);border-radius:22px}
+h1{font-size:21px}
+p{color:var(--slate-soft);font-size:15px;margin:10px 0 0}
+code{display:block;margin-top:16px;padding:12px 14px;background:var(--offwhite);
+border:1px solid var(--line);border-radius:10px;font-size:13px;overflow-wrap:anywhere}
+</style></head><body><div class="box">
+<h1>Something went wrong</h1>
+<p>The Worker is running, but this request failed. The reason is below — it is also in
+Workers Logs in the Cloudflare dashboard.</p>
+<code>${String(detail).replace(/[<>&]/g, "")}</code>
+</div></body></html>`;
 }
