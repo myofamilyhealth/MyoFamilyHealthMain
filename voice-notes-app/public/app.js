@@ -61,11 +61,12 @@
   }
 
   /* ---------- tabs ---------- */
+  const TITLES = { talk: "Talk", organized: "Organized", plan: "Plan" };
   function showTab(name) {
-    $("tab-talk").hidden = name !== "talk";
-    $("tab-organized").hidden = name !== "organized";
+    Object.keys(TITLES).forEach(t => { $("tab-" + t).hidden = t !== name; });
     document.querySelectorAll(".tabbtn").forEach(b => b.classList.toggle("active", b.dataset.tab === name));
-    $("screen-title").textContent = name === "talk" ? "Talk" : "Organized";
+    $("screen-title").textContent = TITLES[name];
+    document.dispatchEvent(new CustomEvent("ts:tab", { detail: name }));
     if (name === "organized") { save(KEYS.seen, items.length); updateBadge(); render(); }
     window.scrollTo(0, 0);
   }
@@ -427,17 +428,31 @@
   });
   $("settings").addEventListener("close", () => save(KEYS.pass, $("passcode").value.trim()));
   $("export-btn").addEventListener("click", () => {
-    const url = URL.createObjectURL(new Blob([JSON.stringify(items, null, 2)], { type: "application/json" }));
+    const backup = { items, parties: load("ts.parties", []), deals: load("ts.deals", []) };
+    const url = URL.createObjectURL(new Blob([JSON.stringify(backup, null, 2)], { type: "application/json" }));
     const a = document.createElement("a");
     a.href = url; a.download = `thoughts-backup-${toLocalStamp(new Date()).slice(0, 10)}.json`;
     document.body.appendChild(a); a.click(); a.remove();
     setTimeout(() => URL.revokeObjectURL(url), 10000);
   });
   $("wipe-btn").addEventListener("click", () => {
-    if (!confirm("Delete every note, to-do and reminder on this phone? This can't be undone.")) return;
+    if (!confirm("Delete every note, to-do, reminder, party list and deal on this phone? This can't be undone.")) return;
     items = []; persist(); save(KEYS.seen, 0); updateBadge(); render();
+    document.dispatchEvent(new Event("ts:wipe"));
     $("settings").close();
   });
+
+  /* ---------- shared with plan.js ---------- */
+  // Other tabs hand over to-dos with this event: detail = [{ title, details, topic }]
+  document.addEventListener("ts:add-todos", e => {
+    const added = (e.detail || []).map(t => ({
+      id: uid(), kind: "todo", title: t.title, details: t.details || "", topic: t.topic || "Shopping",
+      due: null, done: false, notified: false, created: Date.now(), source: ""
+    }));
+    if (!added.length) return;
+    items = added.concat(items); persist(); updateBadge();
+  });
+  window.TS = { toast, showTab, esc, uid, load, save, passcode: () => load(KEYS.pass, ""), openSettings: () => $("settings-btn").click() };
 
   /* ---------- boot ---------- */
   if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => {});

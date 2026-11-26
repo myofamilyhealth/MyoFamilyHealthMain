@@ -166,7 +166,7 @@ textarea:focus, input:focus, select:focus { outline: 2px solid var(--accent); ou
 /* ---------- dialogs ---------- */
 dialog {
   border: 0; padding: 0; background: transparent; color: var(--text);
-  width: min(100% - 24px, 520px); max-height: 90dvh;
+  width: min(100% - 24px, 520px); max-height: 90dvh; overflow-y: auto; overscroll-behavior: contain;
 }
 dialog::backdrop { background: rgba(0,0,0,.4); }
 .sheet { background: var(--surface); border-radius: 20px; padding: 20px; display: grid; gap: 14px; }
@@ -182,3 +182,71 @@ dialog::backdrop { background: rgba(0,0,0,.4); }
   font-size: 15px; max-width: calc(100% - 32px); box-shadow: var(--shadow);
 }
 .toast button { background: none; border: 0; color: inherit; font-weight: 700; text-decoration: underline; margin-left: 8px; }
+
+/* ---------- plan tab ---------- */
+.btn.block { width: 100%; margin: 4px 0 16px; }
+.chips.small .chip { padding: 5px 12px; font-size: 13px; }
+.muted { color: var(--muted); font-weight: 400; }
+.back { background: none; border: 0; color: var(--accent); font-weight: 600; padding: 4px 0; font-size: 15px; }
+.party-title { font-size: 24px; margin: 6px 0 2px; letter-spacing: -.01em; }
+.party-sub { color: var(--muted); font-size: 14px; }
+.progress { height: 6px; background: var(--surface-2); border-radius: 3px; margin: 12px 0; overflow: hidden; }
+.progress > div { height: 100%; background: var(--todo); border-radius: 3px; transition: width .3s ease; }
+.progress.slim { height: 4px; margin: 8px 0 0; }
+.party-row {
+  display: flex; align-items: center; gap: 12px; width: 100%; text-align: left;
+  background: none; border: 0; border-top: 1px solid var(--line); padding: 14px;
+}
+.party-row:first-child { border-top: 0; }
+.party-row .body { flex: 1; min-width: 0; }
+.party-row .title { font-weight: 600; }
+.party-row .details { color: var(--muted); font-size: 14px; }
+.count { color: var(--muted); font-size: 14px; font-variant-numeric: tabular-nums; }
+.qty { color: var(--muted); font-weight: 500; font-size: 14px; }
+.where { color: var(--text); }
+.deal-hit { color: var(--todo); font-weight: 600; }
+.add-row { display: flex; gap: 8px; margin: 4px 0 8px; }
+.add-row input { flex: 1; }
+.actions.wrap { flex-wrap: wrap; justify-content: space-between; margin-bottom: 16px; }
+
+.deal {
+  display: flex; gap: 12px; align-items: flex-start; padding: 12px;
+  background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius);
+  box-shadow: var(--shadow); margin-bottom: 10px;
+}
+.deal .thumb {
+  flex: none; width: 72px; height: 72px; border-radius: 12px; overflow: hidden;
+  background: var(--surface-2); display: grid; place-items: center; font-size: 28px;
+}
+.deal .thumb img { width: 100%; height: 100%; object-fit: cover; }
+.deal .body { flex: 1; min-width: 0; }
+.deal .title { font-weight: 600; }
+.deal .price { font-weight: 600; color: var(--todo); font-size: 15px; }
+.deal .details { color: var(--muted); font-size: 14px; }
+.deal .meta { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; font-size: 13px; }
+.deal .tools { display: flex; flex: none; }
+.deal .tools button { background: none; border: 0; padding: 6px; color: var(--muted); }
+.deal .tools svg { width: 20px; height: 20px; }
+.tag.gift { background: color-mix(in srgb, var(--reminder) 16%, transparent); color: var(--reminder); }
+
+.two { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.seg { display: flex; background: var(--surface-2); border-radius: 12px; padding: 3px; gap: 3px; }
+.seg button {
+  flex: 1; border: 0; background: transparent; border-radius: 9px; padding: 9px 4px;
+  font-weight: 600; font-size: 14px; color: var(--muted); min-height: 40px;
+}
+.seg button.on { background: var(--surface); color: var(--text); box-shadow: var(--shadow); }
+.mini-mic { background: none; border: 0; font-size: 16px; padding: 0 4px; vertical-align: middle; }
+.photo-pick {
+  position: relative; display: grid; place-items: center; min-height: 110px;
+  border: 2px dashed var(--line); border-radius: 14px; color: var(--muted); font-weight: 600;
+  overflow: hidden; cursor: pointer;
+}
+.photo-pick input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+.photo-pick img { width: 100%; max-height: 220px; object-fit: cover; }
+.photo-pick img:not([hidden]) + span {
+  position: absolute; bottom: 8px; right: 8px; background: rgba(0,0,0,.6); color: #fff;
+  padding: 4px 10px; border-radius: 8px; font-size: 13px;
+}
+.check-row { display: flex; gap: 10px; align-items: center; font-weight: 600; }
+.check-row input { width: 22px; height: 22px; accent-color: var(--accent); }

@@ -62,6 +62,53 @@
         <p>Talk out your thoughts on the Talk tab and they'll be sorted here.</p>
       </div>
     </section>
+    <!-- ===== Tab 3: Plan ===== -->
+    <section id="tab-plan" class="tab" hidden aria-labelledby="nav-plan">
+      <div class="chips" role="tablist" aria-label="Plan sections">
+        <button class="chip active" data-plan="parties">Party lists</button>
+        <button class="chip" data-plan="deals">Deals &amp; gift ideas</button>
+      </div>
+
+      <!-- Party lists overview -->
+      <div id="plan-parties">
+        <p class="hint">Tell it what you're hosting and get a "don't forget" list, with where to buy each thing.</p>
+        <button class="btn primary block" id="new-party-btn">+ Plan a party</button>
+        <div id="party-list"></div>
+      </div>
+
+      <!-- One party list -->
+      <div id="plan-party" hidden>
+        <button class="back" id="party-back">‹ All lists</button>
+        <h2 class="party-title" id="party-title"></h2>
+        <div class="party-sub" id="party-sub"></div>
+        <div class="progress"><div id="party-progress"></div></div>
+        <div class="chips small" role="tablist" aria-label="View">
+          <button class="chip active" data-view="category">By category</button>
+          <button class="chip" data-view="store">Shop by store</button>
+        </div>
+        <div id="party-items"></div>
+        <form class="add-row" id="add-item-form">
+          <label class="sr-only" for="add-item">Add your own item</label>
+          <input id="add-item" placeholder="Add something else…" autocomplete="off">
+          <button class="btn" type="submit">Add</button>
+        </form>
+        <div class="actions wrap">
+          <button class="btn ghost" id="party-to-todos">Send unchecked to To-dos</button>
+          <button class="btn danger" id="party-delete">Delete list</button>
+        </div>
+      </div>
+
+      <!-- Deals -->
+      <div id="plan-deals" hidden>
+        <p class="hint">Spotted a good price or a great gift? Log it. Party lists will point you to it when you need that item.</p>
+        <button class="btn primary block" id="new-deal-btn">+ Log a deal</button>
+        <div class="chips small" role="tablist" aria-label="Filter deals">
+          <button class="chip active" data-deals="all">All</button>
+          <button class="chip" data-deals="gift">Gift ideas</button>
+        </div>
+        <div id="deal-list"></div>
+      </div>
+    </section>
   </main>
 
   <nav class="tabbar">
@@ -74,6 +121,10 @@
       <span>Organized</span>
       <b class="badge" id="badge" hidden></b>
     </button>
+    <button id="nav-plan" class="tabbtn" data-tab="plan">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h9l3 3v15H6z"/><path d="M9 10l1.5 1.5L13 9M9 16l1.5 1.5L13 15M15 3v3h3"/></svg>
+      <span>Plan</span>
+    </button>
   </nav>
 
   <!-- ===== Settings ===== -->
@@ -84,6 +135,11 @@
         <span>App passcode</span>
         <input id="passcode" type="password" autocomplete="current-password" placeholder="The APP_PASSCODE you set on the server">
       </label>
+      <label class="field">
+        <span>Stores you shop at</span>
+        <input id="my-stores" placeholder="e.g. Trader Joe's, Costco, Target">
+        <small>Party lists will point you to these first when they carry the item.</small>
+      </label>
       <div class="field">
         <span>Reminder alerts</span>
         <button type="button" class="btn ghost" id="notify-btn">Turn on notifications</button>
@@ -93,7 +149,7 @@
         <span>Your data</span>
         <button type="button" class="btn ghost" id="export-btn">Download a backup</button>
         <button type="button" class="btn danger" id="wipe-btn">Delete everything</button>
-        <small>Notes are stored only on this phone.</small>
+        <small>Everything is stored only on this phone. Backups don't include photos.</small>
       </div>
       <button class="btn primary" value="close">Done</button>
     </form>
@@ -121,8 +177,78 @@
     </form>
   </dialog>
 
+  <!-- ===== New party ===== -->
+  <dialog id="party-dialog">
+    <form method="dialog" class="sheet" id="party-form">
+      <h2>Plan a party</h2>
+      <label class="field"><span>What's the occasion?</span>
+        <select id="pf-occasion">
+          <option>Thanksgiving</option><option>Christmas</option><option>Hanukkah</option>
+          <option>New Year's Eve</option><option>Super Bowl party</option><option>Valentine's Day</option>
+          <option>Easter</option><option>Mother's Day</option><option>Memorial Day BBQ</option>
+          <option>Father's Day</option><option>4th of July</option><option>Labor Day BBQ</option>
+          <option>Halloween</option><option>Birthday party</option><option>Kids' birthday party</option>
+          <option>Baby shower</option><option>Bridal shower</option><option>Graduation party</option>
+          <option>Game night</option><option>Dinner party</option><option value="Other">Something else</option>
+        </select>
+      </label>
+      <div class="two">
+        <label class="field"><span>Guests</span><input id="pf-guests" type="number" min="1" max="500" value="10" inputmode="numeric"></label>
+        <label class="field"><span>Date (optional)</span><input id="pf-date" type="date"></label>
+      </div>
+      <div class="field"><span>How big a production?</span>
+        <div class="seg" id="pf-style">
+          <button type="button" data-v="Minimal">Minimal</button>
+          <button type="button" data-v="Standard" class="on">Standard</button>
+          <button type="button" data-v="Elaborate">Elaborate</button>
+        </div>
+      </div>
+      <div class="field"><span>Where?</span>
+        <div class="seg" id="pf-setting">
+          <button type="button" data-v="Indoors" class="on">Indoors</button>
+          <button type="button" data-v="Outdoors">Outdoors</button>
+          <button type="button" data-v="Indoors and outdoors">Both</button>
+        </div>
+      </div>
+      <label class="field"><span>Anything else? <button type="button" class="mini-mic" id="pf-mic" aria-label="Dictate">🎤</button></span>
+        <textarea id="pf-notes" rows="3" placeholder="e.g. potluck, two vegetarians, kids coming, we're doing the turkey, already have plates"></textarea>
+      </label>
+      <div class="status" id="pf-status" role="status" aria-live="polite"></div>
+      <div class="actions">
+        <button class="btn ghost" value="cancel" formnovalidate>Cancel</button>
+        <button class="btn primary" type="submit" id="pf-go">Make my list</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- ===== Log a deal ===== -->
+  <dialog id="deal-dialog">
+    <form method="dialog" class="sheet" id="deal-form">
+      <h2 id="deal-dialog-title">Log a deal</h2>
+      <label class="photo-pick" id="df-photo-label">
+        <input id="df-photo" type="file" accept="image/*" capture="environment">
+        <img id="df-preview" alt="" hidden>
+        <span id="df-photo-text">📷 Add a photo</span>
+      </label>
+      <label class="field"><span>What is it?</span><input id="df-item" required placeholder="e.g. Sherpa throw blanket"></label>
+      <div class="two">
+        <label class="field"><span>Store</span><input id="df-store" required placeholder="e.g. Costco" list="store-options"></label>
+        <label class="field"><span>Price</span><input id="df-price" inputmode="decimal" placeholder="$70"></label>
+      </div>
+      <label class="field"><span>Notes</span><input id="df-notes" placeholder="e.g. by the front entrance, ends Sunday"></label>
+      <label class="check-row"><input type="checkbox" id="df-gift"> It's a gift idea</label>
+      <label class="field" id="df-for-wrap" hidden><span>Gift for</span><input id="df-for" placeholder="e.g. Mom, teacher, anyone"></label>
+      <div class="actions">
+        <button class="btn ghost" value="cancel" formnovalidate>Cancel</button>
+        <button class="btn primary" value="save">Save</button>
+      </div>
+    </form>
+  </dialog>
+  <datalist id="store-options"></datalist>
+
   <div class="toast" id="toast" hidden></div>
 
   <script src="app.js"></script>
+  <script src="plan.js"></script>
 </body>
 </html>

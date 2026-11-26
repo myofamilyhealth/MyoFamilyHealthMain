@@ -6,6 +6,8 @@
      POST /api/organize   sends what you said to Cloudflare's free AI
                           and returns it sorted into reminders,
                           to-dos and notes
+     POST /api/party      builds a "don't forget" checklist for a
+                          party, with stores to buy each item at
 
    The AI runs on Cloudflare's Workers AI free allowance, so there is
    no API key to manage. A passcode (a Worker secret) stops anyone who
@@ -173,6 +175,148 @@ async function organize(request, env) {
   return json({ items });
 }
 
+/* ---------- shared: run the model, JSON mode first, plain text second ---------- */
+async function runJSON(env, messages, schema, pick, maxTokens) {
+  let out = null;
+  try {
+    const res = await env.AI.run(MODEL, {
+      messages, max_tokens: maxTokens, temperature: 0.2,
+      response_format: { type: "json_schema", json_schema: schema }
+    });
+    out = pick(res);
+  } catch (err) {
+    console.warn("JSON mode failed, retrying without it:", err && err.message);
+  }
+  if (!out) out = pick(await env.AI.run(MODEL, { messages, max_tokens: maxTokens, temperature: 0.2 }));
+  return out;
+}
+
+function aiError(err) {
+  const msg = String(err && err.message || "");
+  console.error("Workers AI error:", msg);
+  if (/neuron|limit|quota|429|capacity/i.test(msg)) {
+    return json({ error: "Today's free AI allowance is used up. It resets at midnight UTC. Try again then." }, 429);
+  }
+  return json({ error: "The AI service had a problem. Try again in a moment." }, 502);
+}
+
+function parseObject(response) {
+  let out = response && response.response;
+  if (typeof out === "string") {
+    const start = out.indexOf("{"), end = out.lastIndexOf("}");
+    if (start < 0 || end < start) return null;
+    try { out = JSON.parse(out.slice(start, end + 1)); } catch { return null; }
+  }
+  return out && typeof out === "object" ? out : null;
+}
+
+/* ---------- party checklists ---------- */
+const PARTY_PROMPT = `You help someone host a party without forgetting anything. Build a practical "don't forget" shopping and prep checklist.
+
+Think through the whole event the way an experienced host would: food and drinks, serving and tableware, seating and setup, decor, cleanup, comfort, and things for the specific occasion. Never leave out the heart of the occasion (the cake and candles for a birthday, the turkey or main dish for Thanksgiving, the countdown and champagne for New Year's Eve). Include the easy-to-forget things busy hosts kick themselves over: extra ice and water, trash bags, napkins, serving utensils, a tablecloth for the outdoor table, flowers for the table, toilet paper and hand soap for guests, foil and containers for leftovers, coffee for after dinner, candles and a lighter, buns and condiments and charcoal or propane for a cookout, towels for a pool party, birthday candles for the cake.
+
+Scale it to the size given:
+- Minimal: only the essentials.
+- Standard: a well-prepared party.
+- Elaborate: everything for a showpiece event, including centerpieces, placemats, signage, favors and a drinks station.
+You'll be told how many items to include at minimum. Reach that number with genuinely useful items, never filler.
+
+Use the guest count to set quantities ("2 bags", "40", "1 per guest"). Respect the person's notes: if they say they already have something, leave it out; if they mention dietary needs, kids or a potluck, plan for that.
+
+Group items into 4-8 categories with short names (e.g. "Food & drinks", "Table & serving", "Decor", "Setup & comfort", "Cleanup"). For each item:
+- name: what to get, specific enough to shop for ("Fresh flowers for the table", "Disposable foil roasting pan")
+- qty: amount for this party, or ""
+- tip: one short helpful note, or "" (most items need none)
+- stores: 2-3 well-known US chains where people most commonly buy that specific item, best fit first. Match the store to the item: groceries at grocery stores (e.g. "Trader Joe's", "Kroger", "Costco"), party supplies at "Dollar Tree", "Target" or "Walmart", decor at "HomeGoods", "Michaels" or "Target", outdoor gear at "Home Depot", "Lowe's" or "Walmart", bulk drinks and paper goods at "Costco" or "Sam's Club". Only name chains that still have stores open (not Bed Bath & Beyond or Party City's closed locations; prefer "Target" or "Walmart" for party supplies). Never give prices.
+
+Also give the list a short title like "Thanksgiving for 12".
+
+Reply with only a JSON object of the form {"title": "...", "categories": [{"name": "...", "items": [{"name": "...", "qty": "...", "tip": "...", "stores": ["..."]}]}]}.`;
+
+const PARTY_SCHEMA = {
+  type: "object",
+  required: ["title", "categories"],
+  properties: {
+    title: { type: "string" },
+    categories: {
+      type: "array",
+      items: {
+        type: "object",
+        required: ["name", "items"],
+        properties: {
+          name: { type: "string" },
+          items: {
+            type: "array",
+            items: {
+              type: "object",
+              required: ["name", "qty", "tip", "stores"],
+              properties: {
+                name: { type: "string" },
+                qty: { type: "string" },
+                tip: { type: "string" },
+                stores: { type: "array", items: { type: "string" } }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+};
+
+async function party(request, env) {
+  if (!env.APP_PASSCODE || !safeEqual(request.headers.get("x-passcode") || "", env.APP_PASSCODE)) {
+    return json({ error: "Wrong or missing passcode. Set it in the app's settings (gear icon)." }, 401);
+  }
+  let body;
+  try { body = await request.json(); } catch { return json({ error: "Bad request." }, 400); }
+
+  const clip = (v, n) => String(v || "").replace(/\s+/g, " ").trim().slice(0, n);
+  const occasion = clip(body.occasion, 60) || "Party";
+  const guests = Math.max(1, Math.min(500, parseInt(body.guests, 10) || 10));
+  const style = ["Minimal", "Standard", "Elaborate"].includes(body.style) ? body.style : "Standard";
+  const setting = clip(body.setting, 40) || "Indoors";
+  const date = /^\d{4}-\d{2}-\d{2}$/.test(body.date || "") ? body.date : "";
+  const notes = clip(body.notes, 1500);
+
+  const messages = [
+    { role: "system", content: PARTY_PROMPT },
+    {
+      role: "user",
+      content:
+        `Occasion: ${occasion}\nGuests: ${guests}\nSize: ${style}\nWhere: ${setting}\n` +
+        (date ? `Date: ${date}\n` : "") +
+        `Include at least ${{ Minimal: 15, Standard: 30, Elaborate: 45 }[style]} items.\n` +
+        `<notes>\n${notes || "(none)"}\n</notes>`
+    }
+  ];
+
+  let out;
+  try {
+    out = await runJSON(env, messages, PARTY_SCHEMA,
+      r => { const o = parseObject(r); return o && Array.isArray(o.categories) && o.categories.length ? o : null; },
+      style === "Elaborate" ? 6000 : 4000);
+  } catch (err) { return aiError(err); }
+  if (!out) return json({ error: "The AI's list couldn't be read. Try again." }, 502);
+
+  const seen = new Set();
+  const categories = out.categories.slice(0, 12).map(c => ({
+    name: clip(c && c.name, 40) || "Other",
+    items: (Array.isArray(c && c.items) ? c.items : []).slice(0, 40).map(i => ({
+      name: clip(i && i.name, 120),
+      qty: clip(i && i.qty, 40),
+      tip: clip(i && i.tip, 200),
+      stores: (Array.isArray(i && i.stores) ? i.stores : []).map(s => clip(s, 40)).filter(Boolean).slice(0, 3)
+    })).filter(i => {
+      const k = i.name.toLowerCase();
+      if (!i.name || seen.has(k)) return false;
+      seen.add(k); return true;
+    })
+  })).filter(c => c.items.length);
+
+  return json({ title: clip(out.title, 80) || `${occasion} for ${guests}`, categories });
+}
+
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
@@ -181,6 +325,16 @@ export default {
       if (request.method !== "POST") return json({ error: "Use POST." }, 405);
       try {
         return await organize(request, env);
+      } catch (err) {
+        console.error(err);
+        return json({ error: "Something went wrong on the server." }, 500);
+      }
+    }
+
+    if (url.pathname === "/api/party") {
+      if (request.method !== "POST") return json({ error: "Use POST." }, 405);
+      try {
+        return await party(request, env);
       } catch (err) {
         console.error(err);
         return json({ error: "Something went wrong on the server." }, 500);
