@@ -2,7 +2,7 @@
    Thought Sorter — the server half
 
    One Worker does two jobs:
-     GET  /*              serves the app itself (public/ folder)
+     GET  /*              serves the app itself (public/, bundled in)
      POST /api/organize   sends what you said to Claude and returns
                           it sorted into reminders, to-dos and notes
 
@@ -12,6 +12,7 @@
    ============================================================ */
 
 import Anthropic from "@anthropic-ai/sdk";
+import FILES from "./public.generated.js";
 
 const MAX_TEXT = 8000;            // characters per recording
 const MAX_TOPICS = 40;
@@ -167,7 +168,11 @@ export default {
 
     if (url.pathname.startsWith("/api/")) return json({ error: "Not found." }, 404);
 
-    // Everything else is the app's static files.
-    return env.ASSETS.fetch(request);
+    // Everything else is the app's own files (bundled from public/).
+    const file = FILES[url.pathname === "/" ? "/index.html" : url.pathname] || FILES["/index.html"];
+    const bytes = Uint8Array.from(atob(file.b64), c => c.charCodeAt(0));
+    return new Response(bytes, {
+      headers: { "content-type": file.type, "cache-control": "no-cache" }
+    });
   }
 };
