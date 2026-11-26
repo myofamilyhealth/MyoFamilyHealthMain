@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Thought Sorter</title>
+  <meta name="description" content="Talk out your thoughts. Get back reminders, to-dos and notes.">
+  <meta name="theme-color" content="#f6f4ef" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#16171a" media="(prefers-color-scheme: dark)">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Thoughts">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icon-180.png">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <h1 id="screen-title">Talk</h1>
+    <button class="icon-btn" id="settings-btn" aria-label="Settings">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1Z"/></svg>
+    </button>
+  </header>
+
+  <main>
+    <!-- ===== Tab 1: Talk ===== -->
+    <section id="tab-talk" class="tab" aria-labelledby="nav-talk">
+      <p class="hint" id="talk-hint">Tap the mic and say whatever's on your mind. Errands, ideas, things to remember. Don't worry about order.</p>
+
+      <div class="mic-wrap">
+        <button class="mic" id="mic-btn" aria-pressed="false" aria-label="Start talking">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>
+        </button>
+        <div class="mic-label" id="mic-label">Tap to talk</div>
+      </div>
+
+      <label class="sr-only" for="transcript">What you said</label>
+      <textarea id="transcript" rows="6" placeholder="Your words show up here. You can also type, or fix anything it misheard."></textarea>
+      <div class="interim" id="interim" aria-live="polite"></div>
+
+      <div class="actions">
+        <button class="btn ghost" id="clear-btn">Clear</button>
+        <button class="btn primary" id="organize-btn">Organize</button>
+      </div>
+
+      <div class="status" id="status" role="status" aria-live="polite"></div>
+    </section>
+
+    <!-- ===== Tab 2: Organized ===== -->
+    <section id="tab-organized" class="tab" hidden aria-labelledby="nav-organized">
+      <div class="chips" role="tablist" aria-label="Filter">
+        <button class="chip active" data-filter="all">All</button>
+        <button class="chip" data-filter="reminder">Reminders</button>
+        <button class="chip" data-filter="todo">To-dos</button>
+        <button class="chip" data-filter="note">Notes</button>
+      </div>
+      <div id="lists"></div>
+      <div class="empty" id="empty" hidden>
+        <p><strong>Nothing here yet.</strong></p>
+        <p>Talk out your thoughts on the Talk tab and they'll be sorted here.</p>
+      </div>
+    </section>
+  </main>
+
+  <nav class="tabbar">
+    <button id="nav-talk" class="tabbtn active" data-tab="talk">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>
+      <span>Talk</span>
+    </button>
+    <button id="nav-organized" class="tabbtn" data-tab="organized">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6h11M9 12h11M9 18h11"/><circle cx="4.5" cy="6" r="1.2"/><circle cx="4.5" cy="12" r="1.2"/><circle cx="4.5" cy="18" r="1.2"/></svg>
+      <span>Organized</span>
+      <b class="badge" id="badge" hidden></b>
+    </button>
+  </nav>
+
+  <!-- ===== Settings ===== -->
+  <dialog id="settings">
+    <form method="dialog" class="sheet">
+      <h2>Settings</h2>
+      <label class="field">
+        <span>App passcode</span>
+        <input id="passcode" type="password" autocomplete="current-password" placeholder="The APP_PASSCODE you set on the server">
+      </label>
+      <div class="field">
+        <span>Reminder alerts</span>
+        <button type="button" class="btn ghost" id="notify-btn">Turn on notifications</button>
+        <small id="notify-note">Alerts fire while the app is open or recently used. For a reminder that always alerts, use the calendar button on it.</small>
+      </div>
+      <div class="field">
+        <span>Your data</span>
+        <button type="button" class="btn ghost" id="export-btn">Download a backup</button>
+        <button type="button" class="btn danger" id="wipe-btn">Delete everything</button>
+        <small>Notes are stored only on this phone.</small>
+      </div>
+      <button class="btn primary" value="close">Done</button>
+    </form>
+  </dialog>
+
+  <!-- ===== Edit item ===== -->
+  <dialog id="editor">
+    <form method="dialog" class="sheet" id="editor-form">
+      <h2>Edit</h2>
+      <label class="field"><span>Type</span>
+        <select id="ed-kind">
+          <option value="reminder">Reminder</option>
+          <option value="todo">To-do</option>
+          <option value="note">Note</option>
+        </select>
+      </label>
+      <label class="field"><span>Title</span><input id="ed-title" required></label>
+      <label class="field"><span>Details</span><textarea id="ed-details" rows="3"></textarea></label>
+      <label class="field"><span>Topic</span><input id="ed-topic"></label>
+      <label class="field" id="ed-due-wrap"><span>When</span><input id="ed-due" type="datetime-local"></label>
+      <div class="actions">
+        <button class="btn ghost" value="cancel" formnovalidate>Cancel</button>
+        <button class="btn primary" value="save">Save</button>
+      </div>
+    </form>
+  </dialog>
+
+  <div class="toast" id="toast" hidden></div>
+
+  <script src="app.js"></script>
+</body>
+</html>

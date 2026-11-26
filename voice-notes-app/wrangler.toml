@@ -1,0 +1,21 @@
+# Thought Sorter — voice notes organized by Claude
+#
+# Deploy (from this folder):
+#   npm install
+#   npx wrangler login
+#   npx wrangler secret put ANTHROPIC_API_KEY   # from console.anthropic.com
+#   npx wrangler secret put APP_PASSCODE        # anything you'll type once on your phone
+#   npx wrangler deploy
+#
+# Wrangler prints the app's URL. Open it on your phone and add it to your
+# home screen.
+
+name = "thought-sorter"
+main = "src/index.js"
+compatibility_date = "2026-01-01"
+compatibility_flags = ["nodejs_compat"]
+
+[assets]
+directory = "./public"
+binding = "ASSETS"
+not_found_handling = "single-page-application"
