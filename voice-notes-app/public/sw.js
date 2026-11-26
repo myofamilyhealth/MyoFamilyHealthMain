@@ -1,6 +1,6 @@
 /* Keeps the app opening offline and shows reminder notifications.
    API calls always go to the network. */
-const CACHE = "thought-sorter-v1";
+const CACHE = "thought-sorter-v2";
 const SHELL = ["./", "index.html", "styles.css", "app.js", "manifest.webmanifest", "icon.svg", "icon-192.png", "icon-512.png", "icon-180.png"];
 
 self.addEventListener("install", e => {

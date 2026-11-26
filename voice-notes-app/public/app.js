@@ -3,7 +3,7 @@
 
    Talk tab:      speech -> text (the browser's built-in speech
                   recognition), editable before sending.
-   Organized tab: what Claude sorted it into, stored on this phone.
+   Organized tab: what the AI sorted it into, stored on this phone.
    ============================================================ */
 (() => {
   "use strict";
@@ -169,7 +169,7 @@
     $("status").classList.toggle("error", isError);
   }
 
-  /* ---------- send to Claude ---------- */
+  /* ---------- send to the AI ---------- */
   $("organize-btn").addEventListener("click", async () => {
     if (listening) { setListening(false); try { rec.stop(); } catch {} }
     const text = transcript.value.trim();
@@ -180,7 +180,7 @@
 
     const btn = $("organize-btn");
     btn.disabled = true; btn.textContent = "Sorting…";
-    setStatus("Claude is reading through your thoughts…");
+    setStatus("Sorting through your thoughts…");
 
     const now = new Date();
     const nowText = now.toLocaleString("en-US", { weekday: "long", year: "numeric", month: "long", day: "numeric", hour: "numeric", minute: "2-digit" });
