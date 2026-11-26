@@ -1,9 +1,8 @@
-# Thought Sorter — voice notes organized by Claude
+# Thought Sorter — voice notes organized by AI
 #
 # Deploy (from this folder):
 #   npm install
 #   npx wrangler login
-#   npx wrangler secret put ANTHROPIC_API_KEY   # from console.anthropic.com
 #   npx wrangler secret put APP_PASSCODE        # anything you'll type once on your phone
 #   npx wrangler deploy
 #
@@ -18,3 +17,7 @@ compatibility_flags = ["nodejs_compat"]
 # Pack public/ into the Worker before each deploy.
 [build]
 command = "node scripts/bundle-public.mjs"
+
+# Cloudflare Workers AI: free daily allowance, no API key needed.
+[ai]
+binding = "AI"
