@@ -147,6 +147,7 @@
       </div>
       <div class="field">
         <span>Your data</span>
+        <button type="button" class="btn ghost" id="install-help">How to add to Home Screen</button>
         <button type="button" class="btn ghost" id="export-btn">Download a backup</button>
         <button type="button" class="btn danger" id="wipe-btn">Delete everything</button>
         <small>Everything is stored only on this phone. Backups don't include photos.</small>
@@ -246,9 +247,23 @@
   </dialog>
   <datalist id="store-options"></datalist>
 
+  <!-- ===== First open: add to home screen ===== -->
+  <dialog id="install" aria-labelledby="install-title">
+    <form method="dialog" class="sheet install-sheet">
+      <img src="icon-192.png" alt="" class="install-icon" width="64" height="64">
+      <h2 id="install-title">Put Thought Sorter on your home screen</h2>
+      <p class="install-lead" id="install-lead"></p>
+      <button type="button" class="btn primary" id="install-now" hidden>Install app</button>
+      <ol class="install-steps" id="install-steps"></ol>
+      <p class="install-why" id="install-why">Opening it from your home screen keeps your notes in one place and makes reminder alerts work.</p>
+      <button class="btn ghost" value="later">Maybe later</button>
+    </form>
+  </dialog>
+
   <div class="toast" id="toast" hidden></div>
 
   <script src="app.js"></script>
   <script src="plan.js"></script>
+  <script src="install.js"></script>
 </body>
 </html>
