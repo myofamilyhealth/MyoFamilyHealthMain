@@ -67,6 +67,7 @@
       <div class="chips" role="tablist" aria-label="Plan sections">
         <button class="chip active" data-plan="parties">Party lists</button>
         <button class="chip" data-plan="deals">Deals &amp; gift ideas</button>
+        <button class="chip" data-plan="shared">Shared</button>
       </div>
 
       <!-- Party lists overview -->
@@ -79,6 +80,7 @@
       <!-- One party list -->
       <div id="plan-party" hidden>
         <button class="back" id="party-back">‹ All lists</button>
+        <div class="live-pill" id="party-live" hidden>● Shared · live</div>
         <h2 class="party-title" id="party-title"></h2>
         <div class="party-sub" id="party-sub"></div>
         <div class="progress"><div id="party-progress"></div></div>
@@ -93,20 +95,53 @@
           <button class="btn" type="submit">Add</button>
         </form>
         <div class="actions wrap">
+          <button class="btn primary" id="party-share">Share list</button>
           <button class="btn ghost" id="party-to-todos">Send unchecked to To-dos</button>
           <button class="btn danger" id="party-delete">Delete list</button>
         </div>
       </div>
 
+      <!-- Shared lists -->
+      <div id="plan-shared" hidden>
+        <p class="hint">Lists you've shared or saved from a link. Everyone with the link sees the same list and checks things off together.</p>
+        <div id="shared-list"></div>
+      </div>
+
       <!-- Deals -->
       <div id="plan-deals" hidden>
         <p class="hint">Spotted a good price or a great gift? Log it. Party lists will point you to it when you need that item.</p>
-        <button class="btn primary block" id="new-deal-btn">+ Log a deal</button>
+        <div class="row-btns">
+          <button class="btn primary" id="new-deal-btn">+ Log a deal</button>
+          <button class="btn" id="deals-share">Share</button>
+        </div>
         <div class="chips small" role="tablist" aria-label="Filter deals">
           <button class="chip active" data-deals="all">All</button>
           <button class="chip" data-deals="gift">Gift ideas</button>
         </div>
         <div id="deal-list"></div>
+      </div>
+    </section>
+    <!-- ===== A shared list (opened from a link or Plan > Shared) ===== -->
+    <section id="tab-shared" class="tab" hidden>
+      <button class="back" id="shared-back">‹ Back</button>
+      <div class="live-pill" id="shared-live">● Live</div>
+      <h2 class="party-title" id="shared-title"></h2>
+      <div class="party-sub" id="shared-meta"></div>
+      <div class="progress" id="shared-progress-wrap"><div id="shared-progress"></div></div>
+      <div id="shared-items"></div>
+      <form class="add-row" id="shared-add-form">
+        <label class="sr-only" for="shared-add">Add to this list</label>
+        <input id="shared-add" placeholder="Add something…" autocomplete="off">
+        <button class="btn" type="submit">Add</button>
+      </form>
+      <div class="share-box">
+        <span>Anyone with this link can see and change this list:</span>
+        <div class="add-row"><input id="shared-link" readonly><button class="btn" type="button" id="shared-copy">Copy</button></div>
+      </div>
+      <div class="actions wrap">
+        <button class="btn primary" id="shared-save" hidden>Save to my app</button>
+        <button class="btn ghost" id="shared-forget" hidden>Remove from my app</button>
+        <button class="btn danger" id="shared-stop" hidden>Stop sharing</button>
       </div>
     </section>
   </main>
@@ -263,6 +298,7 @@
   <div class="toast" id="toast" hidden></div>
 
   <script src="app.js"></script>
+  <script src="shared.js"></script>
   <script src="plan.js"></script>
   <script src="install.js"></script>
 </body>

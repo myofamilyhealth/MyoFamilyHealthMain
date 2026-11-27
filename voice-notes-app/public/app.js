@@ -262,7 +262,8 @@
   }
 
   function section(kind, label, list, inner) {
-    return `<section class="group"><h2><span class="dot k-${kind}"></span>${label} · ${list.length}</h2>${inner}</section>`;
+    const share = kind === "todo" || kind === "note" ? `<button class="share-mini" data-act="share-${kind}">Share</button>` : "";
+    return `<section class="group"><h2><span class="dot k-${kind}"></span>${label} · ${list.length}${share}</h2>${inner}</section>`;
   }
 
   function render() {
@@ -313,6 +314,18 @@
     const btn = e.target.closest("button[data-act]");
     if (!btn) return;
     const act = btn.dataset.act;
+    if (act === "share-todo") {
+      const todos = items.filter(i => i.kind === "todo" && !i.done);
+      if (!todos.length) { toast("No open to-dos to share."); return; }
+      window.TSShare.shareNew({ kind: "todos", title: "To-dos", sections: [{ name: "To-dos", items: todos.map(t => ({ name: t.title, tip: t.details })) }] });
+      return;
+    }
+    if (act === "share-note") {
+      const notes = items.filter(i => i.kind === "note"), by = {};
+      notes.forEach(n => (by[n.topic || "General"] ||= []).push({ name: n.title, tip: n.details }));
+      window.TSShare.shareNew({ kind: "notes", title: "Notes", sections: Object.keys(by).sort().map(k => ({ name: k, items: by[k] })) });
+      return;
+    }
     if (act === "clear-done") {
       items = items.filter(i => !(i.kind === "todo" && i.done)); persist(); render(); return;
     }

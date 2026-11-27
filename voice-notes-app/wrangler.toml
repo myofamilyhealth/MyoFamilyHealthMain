@@ -24,3 +24,12 @@ command = "node scripts/bundle-public.mjs"
 # Cloudflare Workers AI: free daily allowance, no API key needed.
 [ai]
 binding = "AI"
+
+# Shared lists: one small free Durable Object (SQLite) per shared list.
+[[durable_objects.bindings]]
+name = "LISTS"
+class_name = "SharedList"
+
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["SharedList"]

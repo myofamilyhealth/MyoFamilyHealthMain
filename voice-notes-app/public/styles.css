@@ -274,3 +274,18 @@ dialog::backdrop { background: rgba(0,0,0,.4); }
 .kbd { display: inline-block; min-width: 20px; text-align: center; color: var(--accent); font-size: 18px; line-height: 1; }
 .install-why { font-size: 14px; color: var(--muted); margin: 0; }
 .link { word-break: break-all; }
+
+/* ---------- sharing ---------- */
+.live-pill { display: inline-block; font-size: 12px; font-weight: 700; color: var(--todo);
+  background: color-mix(in srgb, var(--todo) 14%, transparent); padding: 3px 10px; border-radius: 999px; margin-top: 8px; }
+.share-box { margin: 16px 0 8px; font-size: 14px; color: var(--muted); }
+.share-box .add-row { margin-top: 6px; }
+.share-box input { font-size: 14px; color: var(--muted); }
+.share-mini { margin-left: auto; background: none; border: 0; color: var(--accent); font-weight: 700;
+  font-size: 13px; text-transform: none; letter-spacing: 0; padding: 4px 6px; }
+.group h2 { width: 100%; }
+.row-btns { display: flex; gap: 10px; margin: 4px 0 16px; }
+.row-btns .btn:first-child { flex: 1; }
+.shared-thumb { flex: none; width: 56px; height: 56px; border-radius: 10px; object-fit: cover; }
+.deal-line { font-weight: 600; color: var(--todo); font-size: 14px; }
+.kind-icon { font-size: 22px; }

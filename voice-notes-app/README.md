@@ -7,6 +7,7 @@ Talk into your phone. AI sorts what you said into **reminders** (with dates), a 
 - **Plan tab:**
   - **Party lists.** Pick the occasion, guest count, Minimal / Standard / Elaborate, and indoors or outdoors, and add notes ("two vegetarians, already have plates"). The AI builds a "don't forget" checklist, from the turkey down to extra ice and a tablecloth for the outdoor table. Check things off, add your own, or send what's left to To-dos.
   - **Where to buy.** Each item shows where to get it. A deal you logged comes first (cheapest first), then one of *your* stores (set in Settings) if the AI suggested it, then the AI's top suggestion. **Shop by store** groups everything still needed by store, so in Trader Joe's you see exactly what to grab there.
+  - **Sharing.** Tap **Share** on a party list, your to-dos, your notes, or your deals and gift ideas to send a live link by text, WhatsApp or email. Everyone with the link sees the same list and can check things off, add and remove items. Changes show up for everyone within a few seconds. The link opens straight to the list, with no passcode or install needed, and the recipient can tap **Save to my app** to find it later under **Plan › Shared**. A shared party list stays your normal party list, just synced. Shared to-dos, notes and deals are a copy, so your private list isn't exposed. Only the person who shared a list can **Stop sharing**, which turns the link off for everyone.
   - **Deals & gift ideas.** Log a deal you spotted: photo, item, store, price, and whether it's a gift idea and for whom. Party lists match items to your deals automatically.
 
 It's a web app you add to your home screen, so there's no App Store. A small Cloudflare Worker serves it and does the sorting with **Cloudflare's free Workers AI** (Llama 3.3 70B). There's no API key and nothing to pay for normal personal use.
@@ -39,6 +40,7 @@ Wrangler prints a URL like `https://thought-sorter.<you>.workers.dev`.
 - **Reminder alerts:** turn on notifications in Settings. They fire while the app is open or was used recently. Phones don't let web apps wake themselves up on a schedule, so for a reminder that must alert you, tap the 📅 calendar button. It adds the reminder to your phone's calendar with an alert.
 - **Speech-to-text** uses your phone's built-in recognition. If the mic doesn't work in your browser, tap the text box and use the keyboard's own mic key to dictate. It works the same way.
 - **Cost:** free. Workers AI gives every account 10,000 "neurons" a day, which by rough estimate is about 100 recordings. Past that, sorting stops until midnight UTC, and your words stay saved. Nothing is charged unless you upgrade to Cloudflare's paid plan.
+- **Shared lists** are stored on Cloudflare (free Durable Objects tier) so everyone can reach them. Anyone who has the link can see and change the list, so only send it to people you trust. The links are long and random, so they can't be guessed.
 - **Store suggestions are general knowledge**, not live inventory or prices. Only deals you log have real prices. The free AI is good but not perfect, so read the list over and add anything it missed.
 - **Privacy:** what you say is sent to Cloudflare's AI to be sorted. Don't use it for patient health information.
 
@@ -48,6 +50,8 @@ Wrangler prints a URL like `https://thought-sorter.<you>.workers.dev`.
 | --- | --- |
 | `public/` | The app: `index.html`, `app.js`, `styles.css`, plus the offline service worker and icons |
 | `public/plan.js` | The Plan tab: party lists, where-to-buy matching, deals and photos |
+| `public/shared.js` | Shared lists: creating links, the live shared-list screen, Plan › Shared |
+| `src/share.js` | Server side of sharing: one Durable Object (free SQLite storage) per shared list |
 | `src/index.js` | The Worker: serves the app and handles `POST /api/organize` and `POST /api/party` (calls Workers AI) |
 | `scripts/bundle-public.mjs` | Packs `public/` into the Worker before each deploy |
 | `wrangler.toml` | Cloudflare config |

@@ -8,6 +8,7 @@
                           to-dos and notes
      POST /api/party      builds a "don't forget" checklist for a
                           party, with stores to buy each item at
+     /api/share/...       live shared lists (see share.js)
 
    The AI runs on Cloudflare's Workers AI free allowance, so there is
    no API key to manage. A passcode (a Worker secret) stops anyone who
@@ -15,6 +16,8 @@
    ============================================================ */
 
 import FILES from "./public.generated.js";
+import { handleShare } from "./share.js";
+export { SharedList } from "./share.js";
 
 const MODEL = "@cf/meta/llama-3.3-70b-instruct-fp8-fast";
 const MAX_TEXT = 8000;            // characters per recording
@@ -338,6 +341,16 @@ export default {
       } catch (err) {
         console.error(err);
         return json({ error: "Something went wrong on the server." }, 500);
+      }
+    }
+
+    if (url.pathname === "/api/share" || url.pathname.startsWith("/api/share/")) {
+      try {
+        const isOwner = !!env.APP_PASSCODE && safeEqual(request.headers.get("x-passcode") || "", env.APP_PASSCODE);
+        return await handleShare(request, env, url, isOwner);
+      } catch (err) {
+        console.error(err);
+        return json({ error: "Something went wrong with sharing. Try again." }, 500);
       }
     }
 

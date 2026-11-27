@@ -96,5 +96,7 @@
 
   let seen = false;
   try { seen = localStorage.getItem(SEEN) === "1"; } catch {}
-  if (!standalone && !seen) setTimeout(open, 400);
+  // Not over a shared list someone was just sent; they came to see the list.
+  const viaShare = new URLSearchParams(location.search).has("list");
+  if (!standalone && !seen && !viaShare) setTimeout(open, 400);
 })();

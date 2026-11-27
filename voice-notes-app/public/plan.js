@@ -27,6 +27,8 @@
   let dealFilter = "all";
 
   const saveParties = () => save(K.parties, parties);
+  // Every party item gets an id so shared lists can sync item by item.
+  parties.forEach(p => p.categories.forEach(c => c.items.forEach(i => { if (!i.id) i.id = uid(); })));
   const saveDeals = () => save(K.deals, deals);
 
   /* ---------- photos (IndexedDB; can be unavailable) ---------- */
@@ -128,12 +130,18 @@
     $("plan-parties").hidden = name !== "parties" || !!openId;
     $("plan-party").hidden = name !== "parties" || !openId;
     $("plan-deals").hidden = name !== "deals";
+    $("plan-shared").hidden = name !== "shared";
+    if (openId && name === "parties") startPartySync(); else stopPartySync();
     render();
   }
   document.querySelectorAll("[data-plan]").forEach(c => c.addEventListener("click", () => { openId = null; showSection(c.dataset.plan); }));
-  document.addEventListener("ts:tab", e => { if (e.detail === "plan") render(); });
+  document.addEventListener("ts:tab", e => {
+    if (e.detail === "plan") { render(); if (openId && section === "parties") startPartySync(); }
+    else stopPartySync();
+  });
 
   function render() {
+    if (section === "shared") return window.TSShare.renderMine();
     if (section === "deals") return renderDeals();
     if (openId) return renderParty();
     renderParties();
@@ -191,7 +199,7 @@
     if (best.deal) {
       const d = best.deal;
       where = `<span class="deal-hit">💲 Your deal: ${esc(d.price ? d.price + " at " : "")}${esc(d.store)}</span>`;
-    } else if (showStore) {
+    } else if (showStore && best.store !== "Anywhere") {
       where = `<span class="where">${best.own ? "★ " : ""}${esc(best.store)}${others.length ? ` <span class="muted">or ${esc(others.join(", "))}</span>` : ""}</span>`;
     }
     return `<div class="item${it.done ? " done" : ""}" data-ci="${ci}" data-ii="${ii}">
@@ -210,6 +218,8 @@
     if (!p) { openId = null; return showSection("parties"); }
     const c = counts(p);
     $("party-title").textContent = p.title;
+    $("party-live").hidden = !p.shareId;
+    $("party-share").textContent = p.shareId ? "Send link again" : "Share list";
     $("party-sub").textContent = [p.style, `${p.guests} guests`, p.setting, fmtDate(p.date)].filter(Boolean).join(" · ");
     $("party-progress").style.width = (c.all ? Math.round(c.done / c.all * 100) : 0) + "%";
 
@@ -245,8 +255,8 @@
     const cat = p && p.categories[+row.dataset.ci];
     const it = cat && cat.items[+row.dataset.ii];
     if (!it) return;
-    if (b.dataset.act === "toggle") it.done = !it.done;
-    else if (b.dataset.act === "remove") cat.items.splice(+row.dataset.ii, 1);
+    if (b.dataset.act === "toggle") { it.done = !it.done; pushOp(p, { op: "toggle", id: it.id, done: it.done }); }
+    else if (b.dataset.act === "remove") { cat.items.splice(+row.dataset.ii, 1); pushOp(p, { op: "remove", id: it.id }); }
     saveParties(); renderParty();
   });
 
@@ -256,7 +266,8 @@
     if (!name || !p) return;
     let cat = p.categories.find(c => c.name === "Added by you");
     if (!cat) { cat = { name: "Added by you", items: [] }; p.categories.push(cat); }
-    cat.items.push({ name, qty: "", tip: "", stores: [], done: false });
+    cat.items.push({ id: uid(), name, qty: "", tip: "", stores: [], done: false });
+    pushOp(p, { op: "add", section: "Added by you", item: { name } });
     $("add-item").value = "";
     saveParties(); renderParty();
   });
@@ -281,9 +292,69 @@
 
   $("party-delete").addEventListener("click", () => {
     const p = current();
-    if (!p || !confirm(`Delete “${p.title}”?`)) return;
+    if (!p || !confirm(p.shareId ? `Delete “${p.title}”? This also stops sharing it.` : `Delete “${p.title}”?`)) return;
+    if (p.shareId) window.TSShare.stop(p.shareId).catch(() => {});
     parties = parties.filter(x => x !== p); saveParties();
     openId = null; showSection("parties");
+  });
+
+  /* ---------- sharing a party list (live) ---------- */
+  function fromServer(p, list) {
+    p.categories = list.sections.map(sec => ({
+      name: sec.name,
+      items: sec.items.map(i => ({ id: i.id, name: i.name, qty: i.qty || "", tip: i.tip || "", stores: i.stores || [], done: !!i.done }))
+    }));
+    p.version = list.version;
+    saveParties();
+  }
+  function unshared(p) {
+    delete p.shareId; delete p.version; saveParties();
+    if (current() === p) renderParty();
+  }
+  async function pushOp(p, op) {
+    if (!p.shareId) return;
+    try {
+      const data = await window.TSShare.change(p.shareId, op);
+      if (data.list) { fromServer(p, data.list); if (current() === p) renderParty(); }
+    } catch (err) {
+      if (err.status === 404) { unshared(p); toast("This list isn't shared anymore."); }
+      else toast(err instanceof TypeError ? "You're offline. That change only saved on this phone." : err.message);
+    }
+  }
+  let partyTimer = null;
+  async function pullParty() {
+    const p = current();
+    if (!p || !p.shareId || document.hidden) return;
+    try {
+      const data = await window.TSShare.read(p.shareId, p.version);
+      if (!data.same && data.list && current() === p) { fromServer(p, data.list); renderParty(); }
+    } catch (err) {
+      if (err.status === 404) { unshared(p); toast("Sharing was stopped for this list."); }
+    }
+  }
+  function startPartySync() {
+    stopPartySync();
+    const p = current();
+    if (!p || !p.shareId) return;
+    pullParty();
+    partyTimer = setInterval(pullParty, 4000);
+  }
+  function stopPartySync() { clearInterval(partyTimer); partyTimer = null; }
+  document.addEventListener("ts:unshared", e => {
+    const p = parties.find(x => x.shareId === e.detail);
+    if (p) unshared(p);
+  });
+
+  $("party-share").addEventListener("click", async () => {
+    const p = current();
+    if (!p) return;
+    if (p.shareId) return window.TSShare.sendLink(p.shareId, p.title);
+    const data = await window.TSShare.shareNew({
+      kind: "party", title: p.title,
+      meta: [p.style, `${p.guests} guests`, p.setting].filter(Boolean).join(" · "),
+      sections: p.categories.map(c => ({ name: c.name, items: c.items }))
+    });
+    if (data) { p.shareId = data.id; p.version = 1; saveParties(); renderParty(); startPartySync(); }
   });
 
   /* ---------- new party ---------- */
@@ -355,7 +426,7 @@
         style: req.style, setting: req.setting, date: req.date, notes: req.notes,
         categories: data.categories.map(c => ({
           name: c.name,
-          items: c.items.map(i => ({ name: i.name, qty: i.qty || "", tip: i.tip || "", stores: i.stores || [], done: false }))
+          items: c.items.map(i => ({ id: uid(), name: i.name, qty: i.qty || "", tip: i.tip || "", stores: i.stores || [], done: false }))
         }))
       };
       parties.unshift(party); saveParties();
@@ -416,6 +487,26 @@
     document.querySelectorAll("[data-deals]").forEach(x => x.classList.toggle("active", x === c));
     renderDeals();
   }));
+
+  /* Share the deals in view (all, or gift ideas), with small photos. */
+  async function smallPhoto(id) {
+    try {
+      const blob = await photoGet(id);
+      if (!blob) return "";
+      const small = await shrink(blob, 480);
+      return await new Promise(res => { const r = new FileReader(); r.onload = () => res(r.result); r.onerror = () => res(""); r.readAsDataURL(small); });
+    } catch { return ""; }
+  }
+  $("deals-share").addEventListener("click", async () => {
+    const list = deals.filter(d => dealFilter === "all" || d.gift);
+    if (!list.length) { toast("Log a deal first, then share."); return; }
+    const items = [];
+    for (const d of list) {
+      items.push({ name: d.item, store: d.store, price: d.price, tip: d.notes, gift: d.gift, for: d.for, photo: d.photo ? await smallPhoto(d.photo) : "" });
+    }
+    const gifts = dealFilter === "gift";
+    await window.TSShare.shareNew({ kind: "deals", title: gifts ? "Gift ideas" : "Deals & gift ideas", sections: [{ name: gifts ? "Gift ideas" : "Deals", items }] });
+  });
 
   let editingDeal = null, pendingPhoto = null, removePhoto = false;
   $("df-gift").addEventListener("change", () => { $("df-for-wrap").hidden = !$("df-gift").checked; });
