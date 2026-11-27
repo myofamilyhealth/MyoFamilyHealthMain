@@ -14,6 +14,9 @@ main = "src/index.js"
 compatibility_date = "2026-01-01"
 compatibility_flags = ["nodejs_compat"]
 
+# Keep variables set in the Cloudflare dashboard (e.g. APP_PASSCODE) on deploy.
+keep_vars = true
+
 # Pack public/ into the Worker before each deploy.
 [build]
 command = "node scripts/bundle-public.mjs"
